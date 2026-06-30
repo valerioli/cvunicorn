@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVUnicorn — Turn your CV into a stunning site in 60 seconds</title>
+<meta name="description" content="How can you still send a CV to an AI unicorn in the AI era? Upload your CV, get a beautiful personal site, go live for cents. Card & stablecoin via Infini.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbfaff; --ink:#16131f; --ink2:#4a4658; --mut:#8b8798; --line:#e7e3f2;
+    --violet:#6c4df6; --violetd:#5436e0; --lime:#cdf24a; --pink:#ff5d9e; --card:#ffffff;
+    --ok:#22b07a;
+    --disp:'Space Grotesk',system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  ::selection{background:var(--violet);color:#fff}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--ui);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .disp{font-family:var(--disp)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:40;background:rgba(251,250,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .navin{max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.5px;display:flex;align-items:center;gap:7px}
+  .logo .u{color:var(--violet)}
+  .navlinks{display:flex;gap:24px;font-size:14px;font-weight:500;color:var(--ink2)}
+  .navlinks a:hover{color:var(--ink)}
+  @media(max-width:680px){.navlinks{display:none}}
+  .btn{font-family:var(--ui);font-weight:600;font-size:14px;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+  .btn.primary{background:var(--violet);color:#fff}
+  .btn.primary:hover{background:var(--violetd);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--violet);color:var(--violet)}
+  .btn.lg{padding:14px 24px;font-size:16px;border-radius:12px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* hero */
+  .hero{padding:64px 0 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(108,77,246,.16),transparent 65%);top:-280px;left:50%;transform:translateX(-50%);z-index:-1}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--violetd);background:#efeaff;border:1px solid #ddd3ff;padding:6px 14px;border-radius:30px;margin-bottom:22px}
+  h1.hl{font-family:var(--disp);font-weight:700;font-size:clamp(34px,5.6vw,60px);line-height:1.04;letter-spacing:-1.5px;max-width:880px;margin:0 auto}
+  h1.hl em{font-style:normal;color:var(--violet)}
+  h1.hl .mark{background:linear-gradient(transparent 62%,var(--lime) 62%);padding:0 .06em}
+  .sub{margin:22px auto 0;max-width:600px;font-size:clamp(16px,2vw,19px);color:var(--ink2)}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+  .trust{margin-top:18px;font-size:13px;color:var(--mut);display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .trust b{color:var(--ink)}
+
+  /* builder */
+  .builder{margin:42px auto 0;max-width:1060px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px -30px rgba(50,30,120,.28);overflow:hidden}
+  .steps{display:flex;border-bottom:1px solid var(--line);background:#f6f4fe}
+  .step{flex:1;padding:14px 16px;font-size:13px;font-weight:600;color:var(--mut);display:flex;align-items:center;justify-content:center;gap:8px}
+  .step .n{width:22px;height:22px;border-radius:50%;background:#e3ddf6;color:var(--mut);display:grid;place-items:center;font-size:12px}
+  .step.on{color:var(--violetd)} .step.on .n{background:var(--violet);color:#fff}
+  .step.done .n{background:var(--ok);color:#fff}
+  .panel{padding:26px}
+  .panel.hidden{display:none}
+  .lab{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);margin:0 0 7px}
+  textarea,input[type=text]{width:100%;font-family:var(--ui);font-size:14px;color:var(--ink);background:#fbfaff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;resize:vertical}
+  textarea:focus,input:focus{outline:none;border-color:var(--violet)}
+  .uprow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  .filebtn{font-size:13px;font-weight:600;color:var(--violetd);background:#efeaff;border:1px dashed #c9bcff;border-radius:10px;padding:10px 14px;cursor:pointer}
+  .smalllink{font-size:13px;color:var(--mut);cursor:pointer;text-decoration:underline}
+  .grid2{display:grid;grid-template-columns:380px 1fr;gap:22px}
+  @media(max-width:840px){.grid2{grid-template-columns:1fr}}
+  .editor{display:flex;flex-direction:column;gap:14px;max-height:560px;overflow:auto;padding-right:6px}
+  .field label{display:block;margin-bottom:0}
+  .preview{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;min-height:540px;position:relative}
+  .preview iframe{width:100%;height:560px;border:0;display:block}
+  .pvbadge{position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;background:rgba(22,19,31,.8);color:#fff;padding:4px 10px;border-radius:20px;z-index:2}
+
+  /* plans */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:6px auto 0}
+  @media(max-width:560px){.plans{grid-template-columns:1fr}}
+  .plan{border:2px solid var(--line);border-radius:16px;padding:22px;cursor:pointer;transition:.15s;position:relative;background:#fff}
+  .plan:hover{border-color:#c9bcff}
+  .plan.sel{border-color:var(--violet);box-shadow:0 0 0 4px rgba(108,77,246,.12)}
+  .plan .tag{font-size:12px;font-weight:700;color:var(--violetd);text-transform:uppercase;letter-spacing:.5px}
+  .plan .price{font-family:var(--disp);font-weight:700;font-size:38px;margin:6px 0 2px}
+  .plan .price small{font-size:15px;color:var(--mut);font-weight:500}
+  .plan .feat{list-style:none;margin-top:14px;font-size:13.5px;color:var(--ink2)}
+  .plan .feat li{padding:5px 0 5px 22px;position:relative}
+  .plan .feat li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+  .best{position:absolute;top:-11px;right:16px;background:var(--lime);color:var(--ink);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+
+  /* sections */
+  section.blk{padding:64px 0}
+  .h2{font-family:var(--disp);font-weight:700;font-size:clamp(26px,4vw,38px);letter-spacing:-1px;text-align:center}
+  .lead{text-align:center;color:var(--ink2);max-width:560px;margin:12px auto 0}
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  @media(max-width:760px){.how{grid-template-columns:1fr}}
+  .howc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .howc .ic{width:42px;height:42px;border-radius:12px;background:#efeaff;display:grid;place-items:center;font-size:20px;margin-bottom:14px}
+  .howc h3{font-family:var(--disp);font-size:18px;margin-bottom:6px}
+  .howc p{font-size:14px;color:var(--ink2)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;text-align:center;color:var(--mut);font-size:13px}
+  footer .logo{justify-content:center;margin-bottom:10px}
+
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(22,19,31,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .ov.on{display:flex}
+  .modal{width:min(440px,100%);background:#fff;border-radius:20px;padding:26px;box-shadow:0 30px 70px -20px rgba(30,10,80,.5)}
+  .modal h3{font-family:var(--disp);font-size:22px;margin-bottom:4px}
+  .modal .summ{background:#f6f4fe;border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0;display:flex;justify-content:space-between;align-items:center}
+  .modal .summ .amt{font-family:var(--disp);font-weight:700;font-size:24px}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;color:var(--ink2)}
+  .tab.on{border-color:var(--violet);color:var(--violetd);background:#efeaff}
+  .pay-card,.pay-coin{display:flex;flex-direction:column;gap:10px}
+  .pay-coin{display:none}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .coinopt{display:flex;gap:8px}
+  .coinopt button{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-weight:600;font-size:13px;cursor:pointer;background:#fff}
+  .coinopt button.on{border-color:var(--violet);background:#efeaff;color:var(--violetd)}
+  .infini{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:var(--mut);margin-top:14px}
+  .infini b{color:var(--ink)}
+  .success{text-align:center;display:none}
+  .success .check{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:32px;margin:0 auto 16px}
+  .urlbox{display:flex;gap:8px;align-items:center;background:#f6f4fe;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:var(--disp);font-weight:600;font-size:14px;margin:12px 0;justify-content:space-between}
+  .note{font-size:11.5px;color:var(--mut);text-align:center;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<nav>
+  <div class="navin">
+    <div class="logo">CV<span class="u">Unicorn</span> 🦄</div>
+    <div class="navlinks">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#builder">Demo</a>
+    </div>
+    <button class="btn primary" onclick="goBuilder()">Build mine →</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="pill">🦄 For AI-era job seekers</div>
+    <h1 class="hl disp">How can you still send a <em>CV</em> to an <em>AI unicorn</em> — <span class="mark">in the AI era?</span></h1>
+    <p class="sub">Upload your CV and get a stunning personal site in 60 seconds. Preview free, go live for cents.</p>
+    <div class="cta">
+      <button class="btn primary lg" onclick="goBuilder()">Build my site — free preview</button>
+      <a class="btn ghost lg" href="#how">See how ↓</a>
+    </div>
+    <div class="trust">💳 Card &amp; <b>stablecoin</b> &middot; powered by <b>Infini</b> &middot; from <b>$0.99</b></div>
+  </div>
+</header>
+
+<!-- BUILDER -->
+<div class="wrap"><div class="builder" id="builder">
+  <div class="steps">
+    <div class="step on" data-s="1"><span class="n">1</span> Add your CV</div>
+    <div class="step" data-s="2"><span class="n">2</span> Preview &amp; edit</div>
+    <div class="step" data-s="3"><span class="n">3</span> Publish</div>
+  </div>
+
+  <!-- step 1 -->
+  <div class="panel" id="p1">
+    <p class="lab">Paste your CV (or the highlights)</p>
+    <textarea id="cvtext" rows="9" placeholder="Paste your CV text here — name, headline, experience, skills, links…"></textarea>
+    <div class="uprow">
+      <label class="filebtn">📄 Upload .txt / .md<input type="file" id="cvfile" accept=".txt,.md,.markdown" hidden></label>
+      <span class="smalllink" onclick="useSample()">Try a sample CV</span>
+      <span style="flex:1"></span>
+      <button class="btn primary" onclick="generate()">✨ Generate my site</button>
+    </div>
+    <p class="note" style="text-align:left">Tip: PDF/Word parsing happens server-side in the full product. For this demo, paste your text or upload a .txt.</p>
+  </div>
+
+  <!-- step 2 -->
+  <div class="panel hidden" id="p2">
+    <div class="grid2">
+      <div class="editor">
+        <div class="field"><p class="lab">Name</p><input type="text" id="f_name"></div>
+        <div class="field"><p class="lab">Headline</p><input type="text" id="f_head"></div>
+        <div class="field"><p class="lab">About</p><textarea id="f_about" rows="4"></textarea></div>
+        <div class="field"><p class="lab">Experience &nbsp;<span style="color:var(--mut);text-transform:none;font-weight:400">(one per block: "Role — Company | Dates", then a line of detail)</span></p><textarea id="f_exp" rows="7"></textarea></div>
+        <div class="field"><p class="lab">Skills (comma-separated)</p><input type="text" id="f_skills"></div>
+        <div class="field"><p class="lab">Links (one per line: "Label | https://…")</p><textarea id="f_links" rows="3"></textarea></div>
+      </div>
+      <div class="preview">
+        <span class="pvbadge">Live preview</span>
+        <iframe id="pv" title="preview"></iframe>
+      </div>
+    </div>
+    <div class="uprow" style="justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" onclick="setStep(1)">← Back</button>
+      <button class="btn primary" onclick="setStep(3)">Looks great — publish →</button>
+    </div>
+  </div>
+
+  <!-- step 3 -->
+  <div class="panel hidden" id="p3">
+    <h3 class="disp" style="text-align:center;font-size:24px;margin-bottom:4px">Choose your plan</h3>
+    <p class="lead" style="margin-bottom:24px">Your site is ready. Pick how long it stays live.</p>
+    <div class="plans">
+      <div class="plan sel" data-plan="week" data-amt="0.99" onclick="selPlan(this)">
+        <div class="tag">Try it</div>
+        <div class="price">$0.99<small> / 1 week</small></div>
+        <ul class="feat"><li>Live for 7 days</li><li>yourname.cvunicorn.site</li><li>Card or stablecoin</li><li>Delete anytime</li></ul>
+      </div>
+      <div class="plan" data-plan="year" data-amt="9.99" onclick="selPlan(this)">
+        <div class="best">Best value</div>
+        <div class="tag">Go pro</div>
+        <div class="price">$9.99<small> / 1 year</small></div>
+        <ul class="feat"><li>Live for 12 months</li><li>Custom domain option</li><li>Edit &amp; re-publish anytime</li><li>Priority generation</li></ul>
+      </div>
+    </div>
+    <div class="uprow" style="justify-content:space-between;margin-top:24px">
+      <button class="btn ghost" onclick="setStep(2)">← Edit</button>
+      <button class="btn primary lg" onclick="openCheckout()">Publish &amp; pay <span id="payAmt">$0.99</span> →</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- HOW -->
+<section class="blk" id="how">
+  <div class="wrap">
+    <h2 class="h2">From CV to live site in three steps</h2>
+    <p class="lead">No design skills. No code. No waiting.</p>
+    <div class="how">
+      <div class="howc"><div class="ic">📤</div><h3>1. Drop your CV</h3><p>Upload or paste it. Our AI reads your roles, skills, and links and structures everything for you.</p></div>
+      <div class="howc"><div class="ic">🎨</div><h3>2. Preview &amp; tweak</h3><p>See a beautiful personal site instantly. Edit any line — the preview updates live.</p></div>
+      <div class="howc"><div class="ic">🚀</div><h3>3. Pay cents, go live</h3><p>$0.99 for a week, $9.99 for a year. Pay by card or stablecoin via Infini. Your site is online in seconds.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="blk" id="pricing" style="background:#f6f4fe">
+  <div class="wrap">
+    <h2 class="h2">Honest, tiny pricing</h2>
+    <p class="lead">We host real sites on a real domain — not localhost. Priced to cover cost, not to gouge you.</p>
+    <div class="plans" style="margin-top:34px">
+      <div class="plan" style="cursor:default">
+        <div class="tag">Try it</div><div class="price">$0.99<small> / 1 week</small></div>
+        <ul class="feat"><li>Fully hosted, HTTPS</li><li>yourname.cvunicorn.site</li><li>DDoS-protected</li><li>One-click delete</li></ul>
+      </div>
+      <div class="plan sel" style="cursor:default">
+        <div class="best">Best value</div><div class="tag">Go pro</div><div class="price">$9.99<small> / 1 year</small></div>
+        <ul class="feat"><li>Everything in weekly</li><li>Custom domain option</li><li>Unlimited edits</li><li>Priority support</li></ul>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:20px;font-size:13px">Pay with credit card or USDC / USDT — settled via Infini's 0.3% merchant rail.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo">CV<span class="u">Unicorn</span> 🦄</div>
+    <p>How can you still send a CV to an AI unicorn in the AI era? &copy; 2026 CVUnicorn</p>
+    <p style="margin-top:8px;font-size:11.5px">Available worldwide except Mainland China &amp; the EU during beta · Card &amp; stablecoin via Infini</p>
+  </div>
+</footer>
+
+<!-- CHECKOUT MODAL -->
+<div class="ov" id="ov">
+  <div class="modal">
+    <div id="checkoutBody">
+      <h3 class="disp">Checkout</h3>
+      <p style="font-size:13px;color:var(--ink2)">Publish <b id="ck_site">yourname.cvunicorn.site</b></p>
+      <div class="summ"><span id="ck_plan">1-week site</span><span class="amt" id="ck_amt">$0.99</span></div>
+      <div class="tabs">
+        <div class="tab on" data-pay="card" onclick="payTab('card')">💳 Card</div>
+        <div class="tab" data-pay="coin" onclick="payTab('coin')">🪙 Stablecoin</div>
+      </div>
+      <div class="pay-card" id="payCard">
+        <input type="text" placeholder="Card number" inputmode="numeric">
+        <div class="row2"><input type="text" placeholder="MM / YY"><input type="text" placeholder="CVC"></div>
+      </div>
+      <div class="pay-coin" id="payCoin">
+        <div class="coinopt"><button class="on">USDC</button><button>USDT</button></div>
+        <div style="font-size:12.5px;color:var(--ink2);background:#f6f4fe;border-radius:10px;padding:12px">Scan or connect wallet to pay <b id="ck_amt2">$0.99</b> in stablecoin. Settles instantly via Infini.</div>
+      </div>
+      <button class="btn primary lg" style="width:100%;margin-top:14px;justify-content:center" onclick="payNow()">Pay <span id="ck_amt3">$0.99</span> &amp; publish</button>
+      <div class="infini">🔒 Secured by <b>Infini</b> · card &amp; stablecoin merchant acquiring</div>
+      <p class="note">Demo checkout — no real charge. In production this opens an Infini hosted payment link; we never touch card data.</p>
+    </div>
+    <div class="success" id="successBody">
+      <div class="check">✓</div>
+      <h3 class="disp">You're live! 🎉</h3>
+      <p style="font-size:14px;color:var(--ink2)">Your site is published and online.</p>
+      <div class="urlbox"><span id="liveUrl">yourname.cvunicorn.site</span><button class="btn ghost" style="padding:6px 12px" onclick="openLive()">Open ↗</button></div>
+      <button class="btn primary" style="width:100%;justify-content:center" onclick="closeOv()">Done</button>
+      <p class="note">A confirmation + manage-link would be emailed. One-click delete available anytime (GDPR/PIPL-ready).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAMPLE=`Alex Rivera
+Machine Learning Engineer · LLMs & Agents
+alex.rivera@email.com · github.com/alexr · linkedin.com/in/alexrivera
+
+ML engineer with 6 years building production AI — from RAG pipelines to multi-agent systems. I ship fast, measure everything, and care about the last 5% that makes a model usable.
+
+Experience
+Senior ML Engineer — Nimbus AI | 2023–Now
+Led the agent platform team; cut hallucination rate 40% with a reranker + eval harness.
+ML Engineer — DataForge | 2020–2023
+Built the recommendation stack serving 12M users; owned the feature store and A/B framework.
+Research Intern — Vector Labs | 2019
+Published on efficient transformers; shipped a 3x faster inference path.
+
+Skills
+Python, PyTorch, LLMs, RAG, Agents, Vector DBs, MLOps, AWS, Evaluation
+
+Links
+GitHub | https://github.com/alexr
+LinkedIn | https://linkedin.com/in/alexrivera`;
+
+const $=id=>document.getElementById(id);
+let state={name:'',head:'',about:'',exp:[],skills:[],links:[]};
+let plan={id:'week',amt:'0.99',label:'1-week site'};
+
+function goBuilder(){document.getElementById('builder').scrollIntoView({behavior:'smooth'});}
+function useSample(){$('cvtext').value=SAMPLE;}
+$('cvfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('cvtext').value=r.result;};r.readAsText(f);});
+
+/* ---- heuristic parser (the AI step is server-side in production) ---- */
+function parse(t){
+  const lines=t.split('\n').map(l=>l.trim());
+  const nonEmpty=lines.filter(l=>l);
+  const s={name:'',head:'',about:'',exp:[],skills:[],links:[]};
+  s.name=nonEmpty[0]||'Your Name';
+  // headline = 2nd line if short & no @
+  if(nonEmpty[1]&&nonEmpty[1].length<70&&!/@|http/.test(nonEmpty[1])) s.head=nonEmpty[1];
+  // about = first longish paragraph not a section header
+  for(let i=2;i<nonEmpty.length;i++){const l=nonEmpty[i];
+    if(/^(experience|work|skills|links|education|contact)\b/i.test(l))break;
+    if(l.length>60){s.about=l;break;}
+  }
+  // sections
+  const idx=name=>lines.findIndex(l=>new RegExp('^'+name+'\\b','i').test(l));
+  // experience
+  let ei=idx('experience');if(ei<0)ei=idx('work');
+  if(ei>=0){let end=lines.length;['skills','links','education','projects'].forEach(k=>{const j=idx(k);if(j>ei&&j<end)end=j;});
+    const blk=lines.slice(ei+1,end).filter(Boolean);
+    let cur=null;
+    blk.forEach(l=>{ if(/\b(19|20)\d\d\b/.test(l)||/\s[—|-]\s/.test(l)&&/\|/.test(l)){ if(cur)s.exp.push(cur); cur={title:l,desc:''}; }
+      else if(cur){cur.desc+=(cur.desc?' ':'')+l;} });
+    if(cur)s.exp.push(cur);
+  }
+  // skills
+  let si=idx('skills');
+  if(si>=0){let line='';for(let i=si+1;i<lines.length;i++){if(lines[i]){line=lines[i];break;}}
+    s.skills=line.split(/[,·|]/).map(x=>x.trim()).filter(Boolean).slice(0,16);}
+  // links
+  const urls=[...t.matchAll(/(https?:\/\/[^\s|]+|(?:www\.|github\.com|linkedin\.com)[^\s|]+)/g)].map(m=>m[0]);
+  const seen=new Set();
+  urls.forEach(u=>{let url=u.startsWith('http')?u:'https://'+u;let label=/github/i.test(u)?'GitHub':/linkedin/i.test(u)?'LinkedIn':url.replace(/^https?:\/\//,'').split('/')[0];
+    if(!seen.has(url)){seen.add(url);s.links.push({label,url});}});
+  // email
+  const em=(t.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[])[0];
+  if(em)s.links.unshift({label:'Email',url:'mailto:'+em});
+  return s;
+}
+function generate(){
+  const t=$('cvtext').value.trim();
+  if(!t){$('cvtext').focus();$('cvtext').placeholder='Paste something first 🙂 — or click "Try a sample CV"';return;}
+  state=parse(t);
+  fillEditor();setStep(2);renderPreview();
+}
+function fillEditor(){
+  $('f_name').value=state.name;$('f_head').value=state.head;$('f_about').value=state.about;
+  $('f_exp').value=state.exp.map(e=>e.title+(e.desc?'\n'+e.desc:'')).join('\n\n');
+  $('f_skills').value=state.skills.join(', ');
+  $('f_links').value=state.links.map(l=>l.label+' | '+l.url).join('\n');
+}
+function readEditor(){
+  state.name=$('f_name').value.trim();state.head=$('f_head').value.trim();state.about=$('f_about').value.trim();
+  state.skills=$('f_skills').value.split(',').map(x=>x.trim()).filter(Boolean);
+  state.exp=$('f_exp').value.split(/\n\s*\n/).map(b=>{const ls=b.split('\n').filter(Boolean);return ls.length?{title:ls[0],desc:ls.slice(1).join(' ')}:null;}).filter(Boolean);
+  state.links=$('f_links').value.split('\n').map(l=>{const p=l.split('|');return p[1]?{label:p[0].trim(),url:p[1].trim()}:(p[0].trim()?{label:p[0].trim().replace(/^https?:\/\//,''),url:p[0].trim()}:null);}).filter(Boolean);
+}
+['f_name','f_head','f_about','f_exp','f_skills','f_links'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id){readEditor();renderPreview();}}));
+
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function portfolioDoc(s){
+  const exp=s.exp.map(e=>`<div class="job"><div class="jt">${esc(e.title)}</div>${e.desc?`<div class="jd">${esc(e.desc)}</div>`:''}</div>`).join('');
+  const skills=s.skills.map(k=>`<span class="chip">${esc(k)}</span>`).join('');
+  const links=s.links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('');
+  const initials=esc((s.name||'You').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase());
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+  :root{--p:#f3f0e8;--i:#15130e;--i2:#3c382e;--m:#857e6c;--ln:#d6d0c0;--lime:#cdf24a;--red:#e8442a;--mo:'JetBrains Mono',monospace;--se:'Fraunces',serif}
+  *{margin:0;padding:0;box-sizing:border-box}body{background:var(--p);color:var(--i);font-family:var(--mo);font-size:13px;line-height:1.55;padding:34px 30px}
+  .av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--lime),#9fd13a);display:grid;place-items:center;font-family:var(--se);font-weight:900;font-size:26px;border:3px solid var(--i);box-shadow:4px 4px 0 var(--lime)}
+  h1{font-family:var(--se);font-weight:900;font-size:clamp(34px,9vw,64px);line-height:.9;letter-spacing:-.03em;margin:16px 0 6px}
+  .head{color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;font-size:12px}
+  .about{margin:18px 0;max-width:640px;color:var(--i2);border-left:5px solid var(--lime);padding-left:16px;font-size:14px}
+  .links{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:600;margin-bottom:8px}
+  .links a{border-bottom:2px solid var(--lime)}
+  .sec{font-family:var(--se);font-weight:800;font-size:22px;margin:26px 0 10px;border-top:2px solid var(--i);padding-top:14px}
+  .job{padding:12px 0;border-bottom:1px solid var(--ln)}
+  .jt{font-family:var(--se);font-weight:700;font-size:17px}
+  .jd{color:var(--i2);margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{border:1.5px solid var(--i);border-radius:20px;padding:4px 11px;font-size:11px}
+  .ft{margin-top:30px;font-size:10px;color:var(--m);letter-spacing:1px;text-transform:uppercase}
+  </style></head><body>
+  <div class="av">${initials}</div>
+  <h1>${esc(s.name||'Your Name')}</h1>
+  <div class="head">${esc(s.head||'Your headline')}</div>
+  <div class="links">${links}</div>
+  ${s.about?`<div class="about">${esc(s.about)}</div>`:''}
+  ${exp?`<div class="sec">Experience</div>${exp}`:''}
+  ${skills?`<div class="sec">Skills</div><div class="chips">${skills}</div>`:''}
+  <div class="ft">Built with CVUnicorn 🦄</div>
+  </body></html>`;
+}
+function renderPreview(){ $('pv').srcdoc=portfolioDoc(state); }
+
+/* steps */
+function setStep(n){
+  [1,2,3].forEach(i=>$('p'+i).classList.toggle('hidden',i!==n));
+  document.querySelectorAll('.step').forEach(s=>{const si=+s.dataset.s;s.classList.toggle('on',si===n);s.classList.toggle('done',si<n);});
+  if(n===2)renderPreview();
+  document.getElementById('builder').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* plans */
+function selPlan(el){
+  document.querySelectorAll('#p3 .plan').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');
+  plan={id:el.dataset.plan,amt:el.dataset.amt,label:el.dataset.plan==='week'?'1-week site':'1-year site'};
+  $('payAmt').textContent='$'+plan.amt;
+}
+function siteName(){const slug=(state.name||'yourname').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,18)||'yourname';return slug+'.cvunicorn.site';}
+function openCheckout(){
+  $('ck_site').textContent=siteName();$('ck_plan').textContent=plan.label;
+  ['ck_amt','ck_amt2','ck_amt3'].forEach(id=>$(id).textContent='$'+plan.amt);
+  $('checkoutBody').style.display='block';$('successBody').style.display='none';
+  payTab('card');$('ov').classList.add('on');
+}
+function payTab(t){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.pay===t));
+  $('payCard').style.display=t==='card'?'flex':'none';$('payCoin').style.display=t==='coin'?'flex':'none';}
+document.querySelectorAll('.coinopt button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.coinopt button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}));
+function payNow(){ $('liveUrl').textContent='https://'+siteName(); $('checkoutBody').style.display='none';$('successBody').style.display='block'; }
+function openLive(){ const w=window.open('','_blank'); w.document.write(portfolioDoc(state)); w.document.close(); }
+function closeOv(){$('ov').classList.remove('on');}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')closeOv();});
+</script>
+</body>
+</html>
