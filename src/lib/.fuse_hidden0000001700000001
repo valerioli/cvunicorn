@@ -1,0 +1,334 @@
+/** Shared intake schema — drives the wizard UI, draft storage, and the AI
+ *  generation prompt. One source of truth for "what can a user tell us". */
+
+export type UploadedFile = {
+  id: string;
+  name: string;
+  url: string; // blob URL or /api/upload?id=…
+  size: number;
+  type: string;
+};
+
+export type FieldType = "text" | "textarea" | "url" | "date";
+
+export type FieldDef = {
+  key: string;
+  label: string;
+  type: FieldType;
+  placeholder?: string;
+  required?: boolean;
+};
+
+export type ModuleDef = {
+  id: ModuleId;
+  icon: string;
+  title: string;
+  blurb: string; // why adding this helps
+  entryNoun: string; // "project", "award"…
+  fields: FieldDef[];
+  allowFiles?: boolean;
+  fileHint?: string;
+  example?: string; // helpful prompt shown in the step
+};
+
+export type ModuleId =
+  | "photos"
+  | "projects"
+  | "portfolio"
+  | "articles"
+  | "social"
+  | "press"
+  | "testimonials"
+  | "talks"
+  | "awards"
+  | "caseStudies"
+  | "videos"
+  | "research"
+  | "launches"
+  | "other";
+
+export const modules: ModuleDef[] = [
+  {
+    id: "photos",
+    icon: "📸",
+    title: "Photos & images",
+    blurb: "Unlocks galleries and a visual identity — sites with photos convert 3× better.",
+    entryNoun: "photo",
+    fields: [{ key: "caption", label: "Caption (optional)", type: "text", placeholder: "Keynote at Token2049, Singapore" }],
+    allowFiles: true,
+    fileHint: "JPG/PNG, up to 8MB each. Event photos, portraits, behind-the-scenes.",
+    example: "Speaking photos, team moments, product shots — anything that shows you in action.",
+  },
+  {
+    id: "projects",
+    icon: "🛠",
+    title: "Projects",
+    blurb: "Turns 'what you do' into 'what you've built'. Each project becomes a card or page.",
+    entryNoun: "project",
+    fields: [
+      { key: "name", label: "Project name", type: "text", required: true, placeholder: "AI Topic Director" },
+      { key: "description", label: "What it is & why it matters", type: "textarea", placeholder: "A tool that…  Results: …" },
+      { key: "link", label: "Link (demo, repo, store…)", type: "url", placeholder: "https://…" },
+    ],
+    allowFiles: true,
+    fileHint: "Screenshots or images of the project.",
+    example: "Side projects count double — they show range and momentum.",
+  },
+  {
+    id: "portfolio",
+    icon: "🎨",
+    title: "Work samples & portfolio",
+    blurb: "Your best pieces, arranged with gallery-grade art direction.",
+    entryNoun: "piece",
+    fields: [
+      { key: "title", label: "Title", type: "text", required: true, placeholder: "Loewe SS22 digital campaign" },
+      { key: "context", label: "Context (client, year, role)", type: "text", placeholder: "Client · 2022 · Creative direction" },
+      { key: "link", label: "Link", type: "url", placeholder: "https://…" },
+    ],
+    allowFiles: true,
+    fileHint: "The work itself — images, PDFs, decks.",
+    example: "Curate: 4 great pieces beat 20 good ones.",
+  },
+  {
+    id: "articles",
+    icon: "📰",
+    title: "Articles & publications",
+    blurb: "Published writing becomes a reading section that proves your voice.",
+    entryNoun: "article",
+    fields: [
+      { key: "title", label: "Title", type: "text", required: true, placeholder: "Why Pay-Fi is the next narrative" },
+      { key: "outlet", label: "Where it appeared", type: "text", placeholder: "TechCrunch, your blog, Medium…" },
+      { key: "link", label: "Link", type: "url", placeholder: "https://…" },
+      { key: "summary", label: "One-line summary (optional)", type: "text" },
+    ],
+    example: "Include your 3–5 strongest pieces; the AI writes elegant teasers for each.",
+  },
+  {
+    id: "social",
+    icon: "🔗",
+    title: "Social profiles",
+    blurb: "Connects your site to where you're active — and tells AI more about your voice.",
+    entryNoun: "profile",
+    fields: [
+      { key: "platform", label: "Platform", type: "text", required: true, placeholder: "LinkedIn, X, GitHub, Instagram…" },
+      { key: "url", label: "Profile URL", type: "url", required: true, placeholder: "https://…" },
+      { key: "stat", label: "Audience (optional)", type: "text", placeholder: "12k followers" },
+    ],
+  },
+  {
+    id: "press",
+    icon: "🗞",
+    title: "PR & news coverage",
+    blurb: "Third-party coverage is the strongest credibility signal a site can show.",
+    entryNoun: "mention",
+    fields: [
+      { key: "outlet", label: "Outlet", type: "text", required: true, placeholder: "Forbes, Wired, 36Kr…" },
+      { key: "title", label: "Headline", type: "text", placeholder: "Meet the team behind…" },
+      { key: "link", label: "Link", type: "url" },
+      { key: "date", label: "When", type: "text", placeholder: "March 2025" },
+    ],
+    example: "Podcasts and interviews count too.",
+  },
+  {
+    id: "testimonials",
+    icon: "💬",
+    title: "Testimonials & recommendations",
+    blurb: "Other people's words about you, doing the bragging so you don't have to.",
+    entryNoun: "testimonial",
+    fields: [
+      { key: "quote", label: "The quote", type: "textarea", required: true, placeholder: "Working with … was…" },
+      { key: "author", label: "Who said it", type: "text", required: true, placeholder: "Jane Doe" },
+      { key: "role", label: "Their role", type: "text", placeholder: "VP Engineering, Acme" },
+    ],
+    example: "LinkedIn recommendations are perfect material — paste your best ones.",
+  },
+  {
+    id: "talks",
+    icon: "🎤",
+    title: "Speaking engagements",
+    blurb: "Stages you've stood on become a credibility timeline.",
+    entryNoun: "talk",
+    fields: [
+      { key: "title", label: "Talk title", type: "text", required: true, placeholder: "The future of stablecoin payments" },
+      { key: "event", label: "Event / venue", type: "text", placeholder: "Token2049, Singapore" },
+      { key: "date", label: "When", type: "text", placeholder: "Sept 2025" },
+      { key: "link", label: "Recording or slides (optional)", type: "url" },
+    ],
+    allowFiles: true,
+    fileHint: "Photos from the stage work beautifully here.",
+  },
+  {
+    id: "awards",
+    icon: "🏆",
+    title: "Awards & certifications",
+    blurb: "Recognitions and credentials, displayed like the achievements they are.",
+    entryNoun: "award",
+    fields: [
+      { key: "title", label: "Award / certification", type: "text", required: true, placeholder: "Webby Award, AWS Solutions Architect…" },
+      { key: "issuer", label: "Issued by", type: "text", placeholder: "Webby Awards" },
+      { key: "year", label: "Year", type: "text", placeholder: "2024" },
+    ],
+  },
+  {
+    id: "caseStudies",
+    icon: "📊",
+    title: "Case studies",
+    blurb: "Problem → approach → result. The format clients and employers trust most.",
+    entryNoun: "case study",
+    fields: [
+      { key: "title", label: "Title", type: "text", required: true, placeholder: "Turning around the APAC market" },
+      { key: "problem", label: "The problem", type: "textarea" },
+      { key: "approach", label: "What you did", type: "textarea" },
+      { key: "result", label: "The result (numbers win)", type: "textarea", placeholder: "#1 market ranking within 12 months" },
+    ],
+    example: "Anonymize clients if needed — 'a global luxury retailer' works fine.",
+  },
+  {
+    id: "videos",
+    icon: "🎬",
+    title: "Videos & media appearances",
+    blurb: "Interviews, reels, and appearances — embedded, not just linked.",
+    entryNoun: "video",
+    fields: [
+      { key: "title", label: "Title", type: "text", required: true, placeholder: "CNBC interview on AI markets" },
+      { key: "link", label: "Video URL (YouTube, Vimeo…)", type: "url", required: true },
+      { key: "context", label: "Context", type: "text", placeholder: "Interview, keynote recording…" },
+    ],
+  },
+  {
+    id: "research",
+    icon: "🔬",
+    title: "Research, publications & patents",
+    blurb: "Formal output formatted properly — citations, venues, DOIs.",
+    entryNoun: "publication",
+    fields: [
+      { key: "title", label: "Title", type: "text", required: true },
+      { key: "venue", label: "Journal / conference / patent office", type: "text", placeholder: "NeurIPS 2024, USPTO…" },
+      { key: "year", label: "Year", type: "text" },
+      { key: "link", label: "DOI / link", type: "url" },
+      { key: "authors", label: "Authors (optional)", type: "text" },
+    ],
+  },
+  {
+    id: "launches",
+    icon: "🚀",
+    title: "Product launches & business results",
+    blurb: "The numbers that make your career undeniable, presented as headline stats.",
+    entryNoun: "result",
+    fields: [
+      { key: "headline", label: "The result", type: "text", required: true, placeholder: "0 → 50,000 users in 12 months" },
+      { key: "context", label: "Where & how", type: "textarea", placeholder: "Scaled Infini across APAC and LATAM by…" },
+      { key: "year", label: "When", type: "text" },
+    ],
+    example: "These become the big gradient numbers at the top of your site.",
+  },
+  {
+    id: "other",
+    icon: "✨",
+    title: "Anything else",
+    blurb: "Fiction, volunteering, a sailing record — the texture that makes you memorable.",
+    entryNoun: "item",
+    fields: [
+      { key: "title", label: "What is it", type: "text", required: true },
+      { key: "description", label: "Tell us about it", type: "textarea" },
+      { key: "link", label: "Link (optional)", type: "url" },
+    ],
+    allowFiles: true,
+  },
+];
+
+export type Entry = {
+  id: string;
+  values: Record<string, string>;
+  files: UploadedFile[];
+};
+
+export type Essentials = {
+  fullName: string;
+  headline: string; // "CMO at AInfinity"
+  profession: string; // slug or free text
+  email: string;
+  bio: string;
+  location: string;
+  photo?: UploadedFile | null;
+  cv?: UploadedFile | null;
+  cvText?: string; // extracted or pasted
+};
+
+export type IntakeData = {
+  draftId: string;
+  essentials: Essentials;
+  selected: ModuleId[];
+  entries: Partial<Record<ModuleId, Entry[]>>;
+  updatedAt: number;
+};
+
+export function emptyIntake(): IntakeData {
+  return {
+    draftId:
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `d_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    essentials: {
+      fullName: "",
+      headline: "",
+      profession: "",
+      email: "",
+      bio: "",
+      location: "",
+      photo: null,
+      cv: null,
+      cvText: "",
+    },
+    selected: [],
+    entries: {},
+    updatedAt: Date.now(),
+  };
+}
+
+export function getModule(id: ModuleId): ModuleDef {
+  return modules.find((m) => m.id === id)!;
+}
+
+/** Richness score 0–100: powers the "more content = better site" meter. */
+export function richnessScore(d: IntakeData): number {
+  let score = 0;
+  const e = d.essentials;
+  if (e.fullName) score += 6;
+  if (e.headline) score += 6;
+  if (e.bio.length > 40) score += 8;
+  if (e.photo) score += 8;
+  if (e.cv || e.cvText.length > 100) score += 16;
+  for (const id of d.selected) {
+    const entries = d.entries[id] ?? [];
+    const filled = entries.filter(
+      (en) =>
+        Object.values(en.values).some((v) => v.trim().length > 0) ||
+        en.files.length > 0,
+    ).length;
+    if (filled > 0) score += Math.min(4 + filled * 2, 10);
+  }
+  return Math.min(100, score);
+}
+
+export function richnessLabel(score: number): { label: string; desc: string } {
+  if (score >= 75)
+    return {
+      label: "Unicorn",
+      desc: "Multi-page site with galleries, dedicated sections, and a magazine-grade layout — like our showcase sites.",
+    };
+  if (score >= 50)
+    return {
+      label: "Impressive",
+      desc: "A rich single-page site with several distinct sections and strong visual moments.",
+    };
+  if (score >= 25)
+    return {
+      label: "Solid",
+      desc: "A clean, professional site. Add photos, projects, or press to unlock more sections.",
+    };
+  return {
+    label: "Starter",
+    desc: "Enough for a simple site. Every module you add makes it visibly better.",
+  };
+}

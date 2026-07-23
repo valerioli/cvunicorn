@@ -1,0 +1,24 @@
+# CVUnicorn
+
+> CVUnicorn is an AI personal website builder. Users upload a resume/CV plus optional career materials — photos, projects, articles, press coverage, testimonials, talks, research, business results — and CVUnicorn's AI designs and publishes a polished personal website in minutes.
+
+## Product
+
+- What it does: turns career materials into a designed, hosted personal website. No design or coding skills required.
+- Pricing: $0.99 Preview Pass (site live for 3 days) · $9.99 Unicorn Year (site live 12 months, custom domain included). One-time payments, no subscription.
+- Generation time: typically under 5 minutes.
+- Audience: founders, executives, designers, developers, academics, consultants, creators, marketers — the input flow adapts per profession.
+- Key property: output scales with input. A CV alone yields a clean one-page site; rich uploads yield a multi-section, magazine-style site with galleries and dedicated pages.
+
+## Pages
+
+- [Home](/): product overview
+- [How it works](/how-it-works): the three-step process
+- [Pricing](/pricing): plans and pricing FAQ
+- [Showcase](/showcase): real generated sites, including a CMO's six-section personal site
+- [FAQ](/faq): common questions, answered directly
+- [Professions](/for/founders): tailored pages per profession (founders, executives, designers, developers, academics, consultants, creators, marketers)
+
+## Contact
+
+- Email: hello@cvunicorn.com
