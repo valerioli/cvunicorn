@@ -117,7 +117,7 @@ export const infiniProvider: PaymentProvider = {
 
   async createCheckout({ order, successUrl, cancelUrl }) {
     const result = unwrap(
-      await infiniRequest("POST", "/order", {
+      await infiniRequest("POST", "/v1/acquiring/order", {
         request_id: order.id, // globally unique → idempotent
         amount: (order.amountCents / 100).toFixed(2),
         client_reference: order.id,
@@ -145,11 +145,13 @@ export const infiniProvider: PaymentProvider = {
 
     // Signature = base64(HMAC-SHA256(secret, timestamp + body))
     const signature =
+      req.headers.get("x-webhook-signature") ??
       req.headers.get("x-infini-signature") ??
       req.headers.get("x-signature") ??
       req.headers.get("signature") ??
       "";
     const timestamp =
+      req.headers.get("x-webhook-timestamp") ??
       req.headers.get("x-infini-timestamp") ??
       req.headers.get("x-timestamp") ??
       req.headers.get("timestamp") ??
@@ -196,7 +198,9 @@ export const infiniProvider: PaymentProvider = {
   async getRemoteStatus(order) {
     if (!order.providerRef) return "pending";
     const result = unwrap(
-      await infiniRequest("GET", "/order", undefined, { order_id: order.providerRef }),
+      await infiniRequest("GET", "/v1/acquiring/order", undefined, {
+        order_id: order.providerRef,
+      }),
     );
     return classifyStatus(pickString(result, ["status", "order_status", "state"]));
   },

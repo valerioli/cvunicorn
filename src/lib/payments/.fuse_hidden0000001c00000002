@@ -1,0 +1,203 @@
+import { createHmac, createHash, timingSafeEqual } from "crypto";
+import type { PaymentProvider, WebhookResult } from "./provider";
+
+/** Infini payment adapter (business.infini.money — "Infinimoney").
+ *
+ *  Infini acts purely as the underlying payment processor; its branding
+ *  appears only on its own hosted checkout page.
+ *
+ *  API: HTTP-Signature authenticated REST
+ *    POST /order            → creates order, returns checkout_url
+ *    GET  /order?order_id=… → order status (used as webhook safety net)
+ *  Auth headers per Infini spec: Date + Digest + Authorization:
+ *    Signature keyId="…",algorithm="hmac-sha256",headers="@request-target date",signature="…"
+ *  Webhook: HMAC-SHA256 (base64) over `${timestamp}${rawBody}`.
+ *
+ *  Env:
+ *    PAYMENT_PROVIDER=infini
+ *    INFINI_API_KEY=…       (keyId from business.infini.money/developer)
+ *    INFINI_SECRET_KEY=…    (secret from the same screen)
+ *    INFINI_ENV=sandbox | production   (default sandbox)
+ *    INFINI_WEBHOOK_SECRET=…           (optional; falls back to secret key)
+ */
+
+const BASE_URLS: Record<string, string> = {
+  production: "https://openapi.infini.money",
+  sandbox: "https://openapi-sandbox.infini.money",
+};
+
+function env(name: string): string {
+  const v = process.env[name];
+  if (!v) {
+    throw new Error(
+      `${name} is not set. Add your Infini credentials (business.infini.money → 开发者/Developer → API keys) to the environment.`,
+    );
+  }
+  return v;
+}
+
+function baseUrl(): string {
+  return BASE_URLS[process.env.INFINI_ENV ?? "sandbox"] ?? BASE_URLS.sandbox;
+}
+
+/** Infini HTTP-Signature headers for a request. */
+function signHeaders(method: string, path: string, body?: string): Record<string, string> {
+  const keyId = env("INFINI_API_KEY");
+  const secret = env("INFINI_SECRET_KEY");
+  const gmt = new Date().toUTCString().replace("GMT", "GMT"); // RFC 7231 format
+
+  let signingString = `${keyId}\n${method.toUpperCase()} ${path}\ndate: ${gmt}\n`;
+  let digestB64: string | null = null;
+  if (body !== undefined) {
+    digestB64 = createHash("sha256").update(body, "utf8").digest("base64");
+    signingString += `digest: SHA-256=${digestB64}\n`;
+  }
+  const signature = createHmac("sha256", secret).update(signingString).digest("base64");
+
+  const headers: Record<string, string> = {
+    Date: gmt,
+    Authorization:
+      `Signature keyId="${keyId}",algorithm="hmac-sha256",` +
+      `headers="@request-target date",signature="${signature}"`,
+  };
+  if (digestB64) headers.Digest = `SHA-256=${digestB64}`;
+  return headers;
+}
+
+async function infiniRequest(
+  method: "GET" | "POST",
+  path: string,
+  jsonData?: Record<string, unknown>,
+  query?: Record<string, string>,
+): Promise<Record<string, unknown>> {
+  const body = jsonData !== undefined ? JSON.stringify(jsonData) : undefined;
+  const headers = signHeaders(method, path, body);
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+
+  let url = `${baseUrl()}${path}`;
+  if (query) url += `?${new URLSearchParams(query).toString()}`;
+
+  const res = await fetch(url, { method, headers, body, cache: "no-store" });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Infini API ${method} ${path} failed (${res.status}): ${text.slice(0, 300)}`);
+  }
+  return JSON.parse(text) as Record<string, unknown>;
+}
+
+/** Infini responses may arrive flat or wrapped in { data: … }. */
+function unwrap(obj: Record<string, unknown>): Record<string, unknown> {
+  if (obj && typeof obj.data === "object" && obj.data !== null) {
+    return obj.data as Record<string, unknown>;
+  }
+  return obj;
+}
+
+function pickString(obj: Record<string, unknown>, keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = obj[k];
+    if (typeof v === "string" && v) return v;
+  }
+  return undefined;
+}
+
+const PAID_STATUSES = ["paid", "success", "succeeded", "completed", "complete", "settled"];
+const FAILED_STATUSES = ["failed", "fail", "expired", "canceled", "cancelled", "closed"];
+
+function classifyStatus(status: string | undefined): "paid" | "failed" | "pending" {
+  if (!status) return "pending";
+  const s = status.toLowerCase();
+  if (PAID_STATUSES.some((p) => s.includes(p))) return "paid";
+  if (FAILED_STATUSES.some((f) => s.includes(f))) return "failed";
+  return "pending";
+}
+
+export const infiniProvider: PaymentProvider = {
+  name: "infini",
+
+  async createCheckout({ order, successUrl, cancelUrl }) {
+    const result = unwrap(
+      await infiniRequest("POST", "/v1/acquiring/order", {
+        request_id: order.id, // globally unique → idempotent
+        amount: (order.amountCents / 100).toFixed(2),
+        client_reference: order.id,
+        order_desc:
+          order.planId === "year"
+            ? "CVUnicorn — 1 year website + custom domain"
+            : "CVUnicorn — 3-day website preview",
+        expires_in: 3600,
+        success_url: successUrl,
+        failure_url: cancelUrl,
+      }),
+    );
+
+    const redirectUrl = pickString(result, ["checkout_url", "checkoutUrl", "url", "payment_url"]);
+    const providerRef = pickString(result, ["order_id", "orderId", "id"]);
+    if (!redirectUrl) {
+      throw new Error(`Infini order created but no checkout_url in response: ${JSON.stringify(result).slice(0, 200)}`);
+    }
+
+    return { redirectUrl, providerRef };
+  },
+
+  async handleWebhook(req: Request): Promise<WebhookResult> {
+    const raw = await req.text();
+
+    // Signature = base64(HMAC-SHA256(secret, timestamp + body))
+    const signature =
+      req.headers.get("x-infini-signature") ??
+      req.headers.get("x-signature") ??
+      req.headers.get("signature") ??
+      "";
+    const timestamp =
+      req.headers.get("x-infini-timestamp") ??
+      req.headers.get("x-timestamp") ??
+      req.headers.get("timestamp") ??
+      "";
+    const secret = process.env.INFINI_WEBHOOK_SECRET || env("INFINI_SECRET_KEY");
+
+    const expected = createHmac("sha256", secret).update(`${timestamp}${raw}`).digest("base64");
+    const a = Buffer.from(signature);
+    const b = Buffer.from(expected);
+    if (!signature || a.length !== b.length || !timingSafeEqual(a, b)) {
+      throw new Error("Invalid Infini webhook signature");
+    }
+    // Reject stale events (>5 min) to prevent replay
+    const ts = Number(timestamp);
+    if (Number.isFinite(ts)) {
+      const ageMs = Math.abs(Date.now() - (ts > 1e12 ? ts : ts * 1000));
+      if (ageMs > 5 * 60 * 1000) throw new Error("Stale Infini webhook");
+    }
+
+    const event = JSON.parse(raw) as Record<string, unknown>;
+    const eventType = pickString(event, ["event", "type", "event_type"]) ?? "";
+    const data = unwrap(event);
+
+    // Our order id travels as client_reference (set at creation).
+    const orderId =
+      pickString(data, ["client_reference", "clientReference"]) ??
+      pickString(event, ["client_reference"]);
+    if (!orderId || !orderId.startsWith("ord_")) return { kind: "ignored" };
+
+    // Events observed in console: order.create / order.update
+    // (+ subscription.update / subscription.cancel, unused here).
+    const status = pickString(data, ["status", "order_status", "state"]);
+    const classified = classifyStatus(status);
+    if (classified === "paid") return { kind: "paid", orderId };
+    if (classified === "failed") {
+      return { kind: "failed", orderId, reason: `Payment ${status ?? "failed"}` };
+    }
+    // order.create / pending updates → nothing to do yet
+    void eventType;
+    return { kind: "ignored" };
+  },
+
+  /** Webhook safety net: poll Infini directly for a pending order. */
+  async getRemoteStatus(order) {
+    if (!order.providerRef) return "pending";
+    const result = unwrap(
+      await infiniRequest("GET", "/order", undefined, { order_id: order.providerRef }),
+    );
+    return classifyStatus(pickString(result, ["status", "order_status", "state"]));
+  },
+};
