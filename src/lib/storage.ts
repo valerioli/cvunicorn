@@ -10,8 +10,8 @@ type Json = unknown;
 
 const memory = new Map<string, { value: string; expiresAt?: number }>();
 
-const url = process.env.UPSTASH_REDIS_REST_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 const hasRedis = Boolean(url && token);
 
 async function redis(command: (string | number)[]): Promise<{ result: unknown }> {
