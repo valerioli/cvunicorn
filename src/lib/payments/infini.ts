@@ -47,6 +47,13 @@ function baseUrl(): string {
   return BASE_URLS[process.env.INFINI_ENV ?? "sandbox"] ?? BASE_URLS.sandbox;
 }
 
+/** Infini requires request_id in UUID format. Derive one deterministically
+ *  from our order id so retries stay idempotent (same order → same UUID). */
+function toUuid(seed: string): string {
+  const h = createHash("sha256").update(seed).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+}
+
 /** Infini HTTP-Signature headers. `pathWithQuery` is the exact request-target
  *  (including any ?query) and MUST match what is sent on the wire. */
 function signHeaders(
@@ -138,7 +145,7 @@ export const infiniProvider: PaymentProvider = {
   async createCheckout({ order, successUrl, cancelUrl }) {
     const result = unwrap(
       await infiniRequest("POST", "/v1/acquiring/order", {
-        request_id: order.id, // globally unique → idempotent
+        request_id: toUuid(order.id), // Infini requires UUID format; deterministic → idempotent
         amount: (order.amountCents / 100).toFixed(2),
         currency: order.currency,
         client_reference: order.id,
