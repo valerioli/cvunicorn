@@ -102,7 +102,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     name: "Valerio Li",
     style: "valerio",
     heroImage: "https://raw.githubusercontent.com/valerioli/portfolio-site/main/headshot.jpg",
-    externalUrl: "https://valerioli.vercel.app",
+    externalUrl: "https://valerio.cvunicorn.com",
     role: {
       en: "Chief Marketing Officer, AInfinity",
       zh: "AInfinity 首席营销官",
@@ -202,7 +202,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     name: "Maya Chen",
     style: "mercury",
     heroImage: "/cases/maya-chen-hero.png",
-    externalUrl: "https://mayachen0.vercel.app",
+    externalUrl: "https://mayachen.cvunicorn.com",
     role: {
       en: "Fractional CFO for climate startups",
       zh: "气候科技创业公司的外部 CFO",
@@ -296,7 +296,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     name: "Noah Rivera",
     style: "resend",
     heroImage: "/cases/noah-rivera-hero.png",
-    externalUrl: "https://noahrivera6.vercel.app",
+    externalUrl: "https://noahrivera.cvunicorn.com",
     role: {
       en: "Senior product designer, health AI",
       zh: "健康 AI 资深产品设计师",
@@ -390,7 +390,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     name: "Ari Okafor",
     style: "active",
     heroImage: "/cases/ari-okafor-hero.png",
-    externalUrl: "https://ariokafor11.vercel.app",
+    externalUrl: "https://ariokafor.cvunicorn.com",
     role: {
       en: "Independent robotics researcher",
       zh: "独立机器人研究者",

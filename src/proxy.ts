@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const generatedSiteHosts: Record<string, { slug: string; style: string }> = {
-  "mayachen0.vercel.app": { slug: "maya-chen", style: "mercury" },
-  "noahrivera6.vercel.app": { slug: "noah-rivera", style: "resend" },
-  "ariokafor11.vercel.app": { slug: "ari-okafor", style: "active" },
+  "valerio.cvunicorn.com": { slug: "valerio-li", style: "valerio" },
+  "mayachen.cvunicorn.com": { slug: "maya-chen", style: "mercury" },
+  "noahrivera.cvunicorn.com": { slug: "noah-rivera", style: "resend" },
+  "ariokafor.cvunicorn.com": { slug: "ari-okafor", style: "active" },
 };
 
 const generatedSitePaths: Record<string, { slug: string; style: string }> = {
