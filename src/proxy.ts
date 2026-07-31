@@ -16,10 +16,24 @@ const generatedSitePaths: Record<string, { slug: string; style: string }> = {
 
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host")?.toLowerCase().split(":")[0] ?? "";
+  const pathname = request.nextUrl.pathname;
+
+  if (host === "valerio.cvunicorn.com" && !pathname.startsWith("/valerio-original")) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/valerio-original${pathname === "/" ? "" : pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
+  if (pathname === "/valerio") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/valerio-original";
+    return NextResponse.rewrite(url);
+  }
+
   const site =
-    request.nextUrl.pathname === "/"
+    pathname === "/"
       ? generatedSiteHosts[host]
-      : generatedSitePaths[request.nextUrl.pathname];
+      : generatedSitePaths[pathname];
 
   if (!site) {
     return NextResponse.next();
@@ -34,5 +48,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/valerio", "/maya", "/noah", "/ari"],
+  matcher: ["/:path*"],
 };

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import SiteMockup from "@/components/SiteMockup";
-import ShowcaseFeature from "@/components/ShowcaseFeature";
 import CaseStudies from "@/components/CaseStudies";
 import SectionHeading from "@/components/SectionHeading";
 import { T } from "@/components/i18n";
@@ -137,32 +136,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ————— SHOWCASE ————— */}
-      <section className="border-b border-[#e5edf5] bg-white py-20 sm:py-24" aria-labelledby="showcase">
-        <div className="mx-auto max-w-[1320px] px-5">
-          <SectionHeading
-            eyebrow={<T en="Showcase" zh="案例展示" />}
-            title={<span id="showcase"><T en="This is what thoughtful input becomes" zh="认真输入，会变成这样的个人网站" /></span>}
-            sub={<T en="A generated CVUnicorn site, embedded right here. The richer the material, the more specific the structure, galleries, writing, and career story become." zh="这是直接嵌入页面的 CVUnicorn 生成网站。材料越具体，结构、图库、文章和职业叙事就越贴合你。" />}
-          />
-          <div className="mt-12">
-            <ShowcaseFeature />
-          </div>
-          <p className="reveal mt-6 text-sm text-[#50617a]">
-            <T en="Start with anything. Add more when you have it." zh="可以从任意材料开始，有更多内容时再补充。" />{" "}
-            <Link href="/showcase" className="text-[#533afd] underline decoration-[#533afd] underline-offset-4 hover:text-[#7389ff]">
-              <T en="Explore the showcase →" zh="查看完整案例 →" />
-            </Link>
-          </p>
-        </div>
-      </section>
-
       {/* ————— CASE STUDIES ————— */}
-      <section className="mx-auto max-w-[1320px] border-b border-[#e5edf5] px-5 py-20 sm:py-24" aria-labelledby="cases">
+      <section className="mx-auto max-w-[1320px] border-b border-[#e5edf5] px-5 py-20 sm:py-24" aria-labelledby="showcase">
         <SectionHeading
-          eyebrow={<T en="Generated sites" zh="生成网站案例" />}
-          title={<span id="cases"><T en="Four websites, embedded on the page" zh="4 个网站，直接嵌入页面预览" /></span>}
-          sub={<T en="Valerio plus three fictional generated sites. Each preview is a real internal website, so visitors can understand the output without opening a new tab." zh="Valerio 加上三个虚拟生成网站。每个预览都是真实内部网页，访问者无需二次跳转就能理解成品效果。" />}
+          eyebrow={<T en="Showcase" zh="案例展示" />}
+          title={<span id="showcase"><T en="Four websites, embedded on the page" zh="4 个网站，直接嵌入页面预览" /></span>}
+          sub={<T en="Four generated examples, each with a distinct visual system and a real page behind the preview." zh="4 个生成案例，每个都有不同的视觉系统，并且预览背后都是真实页面。" />}
         />
         <div className="stagger mt-12">
           <CaseStudies />

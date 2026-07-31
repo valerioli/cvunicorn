@@ -8,10 +8,10 @@ import { useLanguage } from "./i18n";
 type StyleChoice = "auto" | SiteStyleOption["id"];
 
 const generatedSitePaths: Record<string, string> = {
-  "valerio-li": "/valerio",
-  "maya-chen": "/maya",
-  "noah-rivera": "/noah",
-  "ari-okafor": "/ari",
+  "valerio-li": "https://valerio.cvunicorn.com",
+  "maya-chen": "https://mayachen.cvunicorn.com",
+  "noah-rivera": "https://noahrivera.cvunicorn.com",
+  "ari-okafor": "https://ariokafor.cvunicorn.com",
 };
 
 export default function CaseStudies() {
@@ -72,12 +72,17 @@ export default function CaseStudies() {
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {caseStudySites.map((study) => {
-          const activeStyleId = styleChoice === "auto" ? study.style : styleChoice;
+          const isValerio = study.slug === "valerio-li";
+          const activeStyleId = styleChoice === "auto" || isValerio ? study.style : styleChoice;
           const activeStyle = styleById[activeStyleId];
-          const generatedUrl =
-            styleChoice === "auto"
+          const generatedUrl = isValerio
+            ? generatedSitePaths[study.slug]
+            : styleChoice === "auto"
               ? generatedSitePaths[study.slug]
               : `/case-study-sites/${study.slug}?lang=${language}&style=${activeStyleId}`;
+          const previewUrl = isValerio
+            ? "/valerio-original"
+            : `/case-study-sites/${study.slug}?lang=${language}&embed=1&style=${activeStyleId}`;
 
           return (
             <article
@@ -87,7 +92,7 @@ export default function CaseStudies() {
               <div className="relative h-80 overflow-hidden border-b border-[#e5edf5] bg-[#f8fafd]">
                 <iframe
                   title={`${study.name} generated website preview`}
-                  src={`/case-study-sites/${study.slug}?lang=${language}&embed=1&style=${activeStyleId}`}
+                  src={previewUrl}
                   className="h-[640px] w-[200%] origin-top-left scale-50 border-0 bg-white"
                   loading="lazy"
                 />

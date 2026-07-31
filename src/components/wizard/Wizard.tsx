@@ -154,7 +154,7 @@ export default function Wizard() {
               required
               value={data.essentials.fullName}
               onChange={(v) => update((d) => ({ ...d, essentials: { ...d.essentials, fullName: v } }))}
-              placeholder="Valerio Li"
+              placeholder="Maya Chen"
               hint={language === "zh" ? "必填" : "required"}
             />
             <TextField
@@ -162,7 +162,7 @@ export default function Wizard() {
               required
               value={data.essentials.headline}
               onChange={(v) => update((d) => ({ ...d, essentials: { ...d.essentials, headline: v } }))}
-              placeholder="Chief Marketing Officer at AInfinity"
+              placeholder="Fractional CFO for climate startups"
               hint={language === "zh" ? "必填" : "required"}
             />
             <label className="block">
@@ -219,7 +219,7 @@ export default function Wizard() {
               rows={5}
               value={data.essentials.bio}
               onChange={(v) => update((d) => ({ ...d, essentials: { ...d.essentials, bio: v } }))}
-              placeholder="Marketing and growth leader with 15 years across luxury retail, Web3, and AI…"
+              placeholder="Finance operator helping climate founders turn runway, fundraising, and board reporting into clearer decisions…"
             />
           </div>
         </section>
