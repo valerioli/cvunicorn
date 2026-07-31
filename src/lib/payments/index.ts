@@ -14,7 +14,7 @@ export function getPaymentProvider(): PaymentProvider {
     case "dev":
       if (process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production") {
         console.warn(
-          "[payments] WARNING: dev payment provider active in production. Set PAYMENT_PROVIDER=stripe or infini.",
+          "[payments] WARNING: dev payment provider active in production. Set PAYMENT_PROVIDER=stripe.",
         );
       }
       return devProvider;

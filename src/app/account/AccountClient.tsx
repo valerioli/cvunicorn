@@ -65,14 +65,14 @@ export default function AccountClient() {
   if (!orderId || !token) {
     return (
       <Shell>
-        <h1 className="font-display text-3xl font-semibold text-white">My site</h1>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-300">
+        <h1 className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31]">My site</h1>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-[#50617a]">
           Open this page using the personal link from your payment
           confirmation or receipt email — it's your key, no password needed.
         </p>
-        <p className="mt-4 text-sm text-ink-400">
+        <p className="mt-4 text-sm text-[#64748d]">
           Can't find it? Email{" "}
-          <a href="mailto:hello@cvunicorn.com" className="text-iris-300 hover:underline">hello@cvunicorn.com</a>{" "}
+          <a href="mailto:hello@cvunicorn.com" className="text-[#533afd] hover:underline">hello@cvunicorn.com</a>{" "}
           from your purchase address and we'll resend it.
         </p>
         <Link href="/start" className="btn-primary mt-8 inline-flex px-6 py-3 text-sm">
@@ -85,8 +85,8 @@ export default function AccountClient() {
   if (error) {
     return (
       <Shell>
-        <h1 className="font-display text-2xl font-semibold text-white">Link not valid</h1>
-        <p className="mt-3 text-sm text-ink-300">{error}</p>
+        <h1 className="font-display text-2xl font-light text-[#061b31]">Link not valid</h1>
+        <p className="mt-3 text-sm text-[#50617a]">{error}</p>
       </Shell>
     );
   }
@@ -94,7 +94,7 @@ export default function AccountClient() {
   if (!data) {
     return (
       <Shell>
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-iris-400" aria-hidden="true" />
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#e5edf5] border-t-[#533afd]" aria-hidden="true" />
       </Shell>
     );
   }
@@ -104,30 +104,30 @@ export default function AccountClient() {
 
   return (
     <Shell>
-      <h1 className="font-display text-3xl font-semibold text-white">My site</h1>
+      <h1 className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31]">My site</h1>
 
       {/* status card */}
       <div className="card mt-8 w-full max-w-lg p-6 text-left">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-ink-100">
+          <span className="text-sm font-normal text-[#061b31]">
             {data.planId === "year" ? "Unicorn Year" : "Preview Pass"}
           </span>
           {data.activeAccess ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-mint-400/30 bg-mint-400/10 px-2.5 py-1 text-xs font-medium text-mint-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-mint-400" /> Active
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-2.5 py-1 text-xs font-normal text-[#533afd]">
+              <span className="h-1.5 w-1.5 bg-[#533afd]" /> Active
             </span>
           ) : data.status === "paid" ? (
-            <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-2.5 py-1 text-xs font-medium text-amber-300">
+            <span className="rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-2.5 py-1 text-xs font-normal text-[#533afd]">
               Expired
             </span>
           ) : (
-            <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-300">
+            <span className="rounded-[4px] border border-[#e5edf5] bg-[#f8fafd] px-2.5 py-1 text-xs font-normal text-[#64748d]">
               {data.status}
             </span>
           )}
         </div>
         {expires && (
-          <p className="mt-3 text-sm text-ink-300">
+          <p className="mt-3 text-sm text-[#50617a]">
             {data.activeAccess
               ? `Live until ${expires.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })} (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)`
               : `Expired ${expires.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })} — renew to bring your site back exactly as it was.`}
@@ -155,14 +155,14 @@ export default function AccountClient() {
       {/* website card */}
       {data.activeAccess && (
         <div className="card mt-5 w-full max-w-lg p-6 text-left">
-          <h2 className="text-sm font-medium text-ink-100">Your website</h2>
+          <h2 className="text-sm font-normal text-[#061b31]">Your website</h2>
           {siteUrl ? (
             <>
               <a
                 href={siteUrl}
                 target="_blank"
                 rel="noopener"
-                className="mt-3 block truncate rounded-xl border border-iris-400/30 bg-iris-500/10 px-4 py-3 text-sm font-medium text-iris-300 hover:bg-iris-500/15"
+                className="mt-3 block truncate rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-sm font-normal text-[#533afd] hover:bg-[#e8e9ff]"
               >
                 {typeof window !== "undefined" ? window.location.origin : ""}{siteUrl} ↗
               </a>
@@ -177,7 +177,7 @@ export default function AccountClient() {
             </>
           ) : (
             <>
-              <p className="mt-2 text-sm text-ink-300">
+              <p className="mt-2 text-sm text-[#50617a]">
                 Your payment is confirmed — generate your website now. It takes
                 a few minutes.
               </p>
@@ -187,12 +187,12 @@ export default function AccountClient() {
                 disabled={generating}
                 className="btn-primary mt-4 px-6 py-3 text-sm disabled:opacity-60"
               >
-                {generating ? "Designing your website… (~2–4 min)" : "✨ Generate my website"}
+                {generating ? "Designing your website… (~2–4 min)" : "Generate my website"}
               </button>
             </>
           )}
           {genError && (
-            <p role="alert" className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-400">
+            <p role="alert" className="mt-3 rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-xs text-[#533afd]">
               {genError}
             </p>
           )}
@@ -204,7 +204,7 @@ export default function AccountClient() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center px-5 pb-24 pt-10 text-center">
+    <div className="mx-auto flex max-w-2xl flex-col px-5 pb-24 pt-10">
       {children}
     </div>
   );

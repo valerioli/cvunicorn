@@ -3,7 +3,7 @@ import type { Order } from "@/lib/orders";
 /** Provider-agnostic payment interface.
  *
  *  CVUnicorn is provider-neutral by design: the rest of the app only ever
- *  talks to this interface. Swapping Infinimoney in (or any provider out)
+ *  talks to this interface. Swapping Stripe, Infini, or another provider
  *  touches exactly one file. Provider branding never leaks outside the
  *  provider's own hosted checkout page.
  */

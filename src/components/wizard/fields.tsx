@@ -5,9 +5,9 @@ import type { UploadedFile } from "@/lib/intake";
 
 export function Label({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <span className="mb-1.5 block text-sm font-medium text-ink-100">
+    <span className="mb-1.5 block text-sm font-normal text-[#061b31]">
       {children}
-      {hint && <span className="ml-2 text-xs font-normal text-ink-400">{hint}</span>}
+      {hint && <span className="ml-2 text-xs font-normal text-[#64748d]">{hint}</span>}
     </span>
   );
 }
@@ -124,21 +124,21 @@ export function FileDrop(props: {
           setDragOver(false);
           handleFiles(e.dataTransfer.files);
         }}
-        className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-7 text-center transition ${
+        className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[4px] border border-dashed px-4 py-7 text-center transition ${
           dragOver
-            ? "border-iris-400 bg-iris-500/10"
-            : "border-white/15 bg-white/3 hover:border-iris-400/50 hover:bg-white/5"
+            ? "border-[#533afd] bg-[#f8fafd]"
+            : "border-[#d6d9fc] bg-white hover:border-[#533afd] hover:bg-[#f8fafd]"
         }`}
       >
-        <svg className="h-6 w-6 text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className="h-6 w-6 text-[#533afd]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 16V4m0 0 4 4m-4-4-4 4" />
           <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
         </svg>
-        <p className="text-sm text-ink-200">
+        <p className="text-sm text-[#061b31]">
           {busy ? "Uploading…" : "Drop files here or click to browse"}
         </p>
         {props.accept && (
-          <p className="text-xs text-ink-400">{props.accept.replaceAll(",", " · ")}</p>
+          <p className="text-xs text-[#64748d]">{props.accept.replaceAll(",", " · ")}</p>
         )}
       </div>
       <input
@@ -149,13 +149,13 @@ export function FileDrop(props: {
         multiple={props.multiple}
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {error && <p className="mt-2 text-xs text-rose-400">{error}</p>}
+      {error && <p className="mt-2 text-xs text-[#533afd]">{error}</p>}
       {props.files.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2">
           {props.files.map((f) => (
             <li
               key={f.id}
-              className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 py-1.5 pl-3 pr-1.5 text-xs text-ink-200"
+              className="flex items-center gap-2 rounded-[4px] border border-[#e5edf5] bg-[#f8fafd] py-1.5 pl-3 pr-1.5 text-xs text-[#50617a]"
             >
               <span className="max-w-40 truncate">{f.name}</span>
               <button
@@ -164,7 +164,7 @@ export function FileDrop(props: {
                 onClick={() =>
                   props.onChange(props.files.filter((x) => x.id !== f.id))
                 }
-                className="rounded-md p-1 text-ink-400 hover:bg-white/10 hover:text-white"
+                className="rounded-[4px] p-1 text-[#64748d] hover:bg-[#e8e9ff] hover:text-[#533afd]"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>

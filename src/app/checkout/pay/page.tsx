@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 /** Dev-provider simulated checkout. In production with
- *  PAYMENT_PROVIDER=infinimoney, customers go to the provider's hosted
+ *  PAYMENT_PROVIDER=stripe, customers go to the provider's hosted
  *  page instead and never see this route. */
 export default function DevPayPage() {
   return (

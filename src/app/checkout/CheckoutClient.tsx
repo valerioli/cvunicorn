@@ -14,6 +14,7 @@ export default function CheckoutClient() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const plan = getPlan(planId)!;
+  const accessLabel = plan.durationDays === 365 ? "12 months" : `${plan.durationDays} days`;
 
   async function pay() {
     setBusy(true);
@@ -32,123 +33,192 @@ export default function CheckoutClient() {
       }
       window.location.href = json.redirectUrl;
     } catch {
-      setError("Network error — please check your connection and try again.");
+      setError("Network error. Please check your connection and try again.");
       setBusy(false);
     }
   }
 
   return (
-    <div className="mx-auto max-w-lg px-5 pb-24 pt-8">
-      <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">
-        Put your site live
-      </h1>
-      <p className="mt-2 text-sm text-ink-300">
-        One-time payment. Your website goes live the moment it clears.
-      </p>
+    <section className="min-h-[calc(100vh-5rem)] bg-[#ffffff] px-5 pb-20 pt-8 text-[#061b31] sm:pt-12">
+      <div className="mx-auto max-w-[1120px]">
+        <div className="border-b border-[#e5edf5] pb-8">
+          <p className="text-xs font-normal uppercase text-[#64748d]">CVUnicorn Checkout</p>
+          <h1 className="mt-4 max-w-2xl text-4xl font-light leading-[1.05] text-[#061b31] sm:text-5xl">
+            Put your personal website live with card payment.
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg font-light leading-relaxed text-[#50617a]">
+            Choose a one-time hosting pass, enter the email for your receipt, then continue to Stripe's secure hosted checkout.
+          </p>
+        </div>
 
-      {/* plan selection */}
-      <fieldset className="mt-8">
-        <legend className="sr-only">Choose your plan</legend>
-        <div className="grid gap-3">
-          {plans.map((p) => {
-            const on = planId === p.id;
-            return (
-              <label
-                key={p.id}
-                className={`card flex cursor-pointer items-center justify-between gap-4 p-4.5 transition ${
-                  on ? "ring-glow border-iris-400/40" : "card-hover"
-                }`}
-              >
-                <span className="flex items-center gap-3.5">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value={p.id}
-                    checked={on}
-                    onChange={() => setPlanId(p.id)}
-                    className="h-4 w-4"
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold text-white">
-                      {p.name}
-                      {p.highlight && (
-                        <span className="ml-2 rounded-full bg-gradient-to-r from-iris-500 to-rose-500 px-2 py-0.5 text-[10px] font-semibold">
-                          BEST VALUE
+        <div className="grid gap-8 border-b border-[#e5edf5] py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
+          <div>
+            <fieldset>
+              <legend className="text-sm font-normal text-[#061b31]">Plan</legend>
+              <div className="mt-3 grid gap-3">
+                {plans.map((p) => {
+                  const on = planId === p.id;
+                  return (
+                    <label
+                      key={p.id}
+                      className={`grid cursor-pointer gap-4 rounded-[4px] border p-5 transition sm:grid-cols-[1fr_auto] ${
+                        on
+                          ? "border-[#533afd] bg-[#f8fafd]"
+                          : "border-[#e5edf5] bg-white hover:border-[#b9b9f9]"
+                      }`}
+                    >
+                      <span className="flex items-start gap-3">
+                        <input
+                          type="radio"
+                          name="plan"
+                          value={p.id}
+                          checked={on}
+                          onChange={() => setPlanId(p.id)}
+                          className="mt-1 h-4 w-4"
+                        />
+                        <span>
+                          <span className="flex flex-wrap items-center gap-2 text-base font-normal text-[#061b31]">
+                            {p.name}
+                            {p.highlight && (
+                              <span className="rounded-[4px] border border-[#d6d9fc] bg-[#e8e9ff] px-2 py-0.5 text-xs text-[#533afd]">
+                                Best value
+                              </span>
+                            )}
+                          </span>
+                          <span className="mt-1 block text-sm leading-relaxed text-[#50617a]">{p.tagline}</span>
                         </span>
-                      )}
-                    </span>
-                    <span className="mt-0.5 block text-xs text-ink-400">{p.tagline}</span>
-                  </span>
-                </span>
-                <span className="text-right">
-                  <span className="font-display text-xl font-semibold text-white">{p.priceLabel}</span>
-                  <span className="block text-[11px] text-ink-400">{p.period}</span>
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      </fieldset>
+                      </span>
+                      <span className="text-left sm:text-right">
+                        <span className="block text-2xl font-light text-[#061b31]">{p.priceLabel}</span>
+                        <span className="block text-sm text-[#64748d]">{p.period}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-      {/* email */}
-      <label className="mt-6 block">
-        <span className="mb-1.5 block text-sm font-medium text-ink-100">
-          Email <span className="ml-2 text-xs font-normal text-ink-400">for your receipt & site access</span>
-        </span>
-        <input
-          type="email"
-          className="field"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          autoComplete="email"
-        />
-      </label>
+            <label className="mt-7 block">
+              <span className="block text-sm font-normal text-[#061b31]">Receipt email</span>
+              <span className="mt-1 block text-sm text-[#50617a]">Your dashboard and receipt link are tied to this address.</span>
+              <input
+                type="email"
+                className="mt-3 w-full rounded-[4px] border border-[#e5edf5] bg-white px-4 py-3 text-base text-[#061b31] outline-none transition placeholder:text-[#839bc8] focus:border-[#533afd] focus:ring-2 focus:ring-[#e8e9ff]"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
+            </label>
 
-      {/* summary */}
-      <div className="card mt-6 p-5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-ink-300">{plan.name}</span>
-          <span className="font-semibold text-white">{plan.priceLabel}</span>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-xs text-ink-400">
-          <span>Access period</span>
-          <span>{plan.durationDays === 365 ? "12 months" : `${plan.durationDays} days`}</span>
-        </div>
-        <div className="hairline mt-3 flex items-center justify-between border-t pt-3 text-sm">
-          <span className="font-medium text-ink-100">Total due today</span>
-          <span className="font-display text-lg font-semibold text-white">{plan.priceLabel}</span>
-        </div>
-      </div>
+            {error && (
+              <p role="alert" className="mt-5 rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-sm text-[#061b31]">
+                {error}
+              </p>
+            )}
 
-      {error && (
-        <p role="alert" className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-          {error}
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={pay}
+                disabled={busy || !email}
+                className="inline-flex min-h-12 items-center justify-center rounded-[4px] bg-[#533afd] px-6 py-3 text-sm font-normal text-white transition hover:bg-[#7389ff] disabled:pointer-events-none disabled:opacity-50"
+              >
+                {busy ? "Preparing Stripe Checkout..." : `Pay ${plan.priceLabel} securely`}
+              </button>
+              <Link
+                href="/pricing"
+                className="inline-flex min-h-12 items-center justify-center rounded-[4px] border border-[#b9b9f9] px-6 py-3 text-sm font-normal text-[#533afd] transition hover:bg-[#f8fafd]"
+              >
+                Compare plans
+              </Link>
+            </div>
+
+            <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-[#50617a]">
+              <LockIcon />
+              Card details are collected by Stripe Checkout. CVUnicorn never sees or stores your card number.
+            </p>
+          </div>
+
+          <aside className="h-fit rounded-[4px] border border-[#e5edf5] bg-[#f8fafd] p-6">
+            <p className="text-xs font-normal uppercase text-[#64748d]">Order summary</p>
+            <div className="mt-6 border-b border-[#e5edf5] pb-5">
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <p className="text-base font-normal text-[#061b31]">{plan.name}</p>
+                  <p className="mt-1 text-sm text-[#50617a]">{accessLabel} of live hosting</p>
+                </div>
+                <p className="text-2xl font-light text-[#061b31]">{plan.priceLabel}</p>
+              </div>
+            </div>
+
+            <dl className="space-y-3 border-b border-[#e5edf5] py-5 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#50617a]">Subtotal</dt>
+                <dd className="text-[#061b31]">{plan.priceLabel}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#50617a]">Renewal</dt>
+                <dd className="text-[#061b31]">None</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#50617a]">Currency</dt>
+                <dd className="text-[#061b31]">USD</dd>
+              </div>
+            </dl>
+
+            <div className="flex items-end justify-between gap-4 py-5">
+              <p className="text-sm font-normal text-[#061b31]">Total due today</p>
+              <p className="text-4xl font-light text-[#061b31]">{plan.priceLabel}</p>
+            </div>
+
+            <div className="grid gap-3 border-t border-[#e5edf5] pt-5 text-sm text-[#50617a]">
+              <p className="flex items-center gap-2">
+                <CheckIcon />
+                One-time payment
+              </p>
+              <p className="flex items-center gap-2">
+                <CheckIcon />
+                Hosted checkout with 3D Secure support
+              </p>
+              <p className="flex items-center gap-2">
+                <CheckIcon />
+                Access opens after payment confirmation
+              </p>
+            </div>
+          </aside>
+        </div>
+
+        <p className="pt-5 text-sm text-[#50617a]">
+          By paying you agree to our{" "}
+          <Link href="/legal/terms" className="text-[#533afd] underline underline-offset-2">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/legal/refunds" className="text-[#533afd] underline underline-offset-2">
+            Refund Policy
+          </Link>
+          .
         </p>
-      )}
+      </div>
+    </section>
+  );
+}
 
-      <button
-        type="button"
-        onClick={pay}
-        disabled={busy || !email}
-        className="btn-primary mt-6 w-full px-6 py-3.5 text-base disabled:pointer-events-none disabled:opacity-50"
-      >
-        {busy ? "Preparing secure checkout…" : `Pay ${plan.priceLabel} securely`}
-      </button>
+function CheckIcon() {
+  return (
+    <svg className="h-4 w-4 shrink-0 text-[#533afd]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m4 10.5 4 4 8-9" />
+    </svg>
+  );
+}
 
-      <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-ink-400">
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <rect x="5" y="11" width="14" height="9" rx="2" />
-          <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-        </svg>
-        Card details are handled by our certified payment processor — they never touch our servers.
-      </p>
-      <p className="mt-2 text-center text-xs text-ink-400">
-        By paying you agree to our{" "}
-        <Link href="/legal/terms" className="underline underline-offset-2 hover:text-ink-200">Terms</Link> and{" "}
-        <Link href="/legal/refunds" className="underline underline-offset-2 hover:text-ink-200">Refund Policy</Link>.
-      </p>
-    </div>
+function LockIcon() {
+  return (
+    <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#533afd]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
   );
 }

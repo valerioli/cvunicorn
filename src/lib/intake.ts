@@ -47,6 +47,8 @@ export type ModuleId =
   | "launches"
   | "other";
 
+export type SiteStyleId = "valerio" | "resend" | "mercury" | "notion" | "active";
+
 export const modules: ModuleDef[] = [
   {
     id: "photos",
@@ -257,6 +259,7 @@ export type Essentials = {
 
 export type IntakeData = {
   draftId: string;
+  style: SiteStyleId;
   essentials: Essentials;
   selected: ModuleId[];
   entries: Partial<Record<ModuleId, Entry[]>>;
@@ -269,6 +272,7 @@ export function emptyIntake(): IntakeData {
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `d_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    style: "valerio",
     essentials: {
       fullName: "",
       headline: "",

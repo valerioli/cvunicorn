@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RevealInit from "@/components/RevealInit";
+import { LanguageProvider } from "@/components/i18n";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationJsonLd, websiteJsonLd, SITE } from "@/lib/seo";
 import "./globals.css";
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08070d",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };
@@ -78,19 +79,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="min-h-screen antialiased">
-        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-iris-500 focus:px-4 focus:py-2 focus:text-white"
-        >
-          Skip to content
-        </a>
-        <Header />
-        <main id="main" className="pt-20 md:pt-24">
-          {children}
-        </main>
-        <Footer />
-        <RevealInit />
+        <LanguageProvider>
+          <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-iris-500 focus:px-4 focus:py-2 focus:text-white"
+          >
+            Skip to content
+          </a>
+          <Header />
+          <main id="main" className="pt-20 md:pt-24">
+            {children}
+          </main>
+          <Footer />
+          <RevealInit />
+        </LanguageProvider>
       </body>
     </html>
   );

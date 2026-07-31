@@ -19,26 +19,26 @@ export default function FailedClient() {
   }, [orderId, token]);
 
   return (
-    <div className="mx-auto max-w-lg px-5 pb-24 pt-14 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-rose-500/40 bg-rose-500/10">
-        <svg className="h-7 w-7 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    <div className="mx-auto max-w-lg px-5 pb-24 pt-14">
+      <div className="flex h-12 w-12 items-center justify-center rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd]">
+        <svg className="h-6 w-6 text-[#533afd]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </div>
-      <h1 className="mt-6 font-display text-3xl font-semibold text-white">
+      <h1 className="mt-6 font-display text-3xl font-light tracking-[-0.02em] text-[#061b31]">
         That payment didn't go through
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-ink-300">
+      <p className="mt-3 text-sm leading-relaxed text-[#50617a]">
         {reason ?? "No money left your account — the payment was canceled or declined."}{" "}
         Your website draft is saved and waiting; nothing is lost.
       </p>
-      <div className="card mx-auto mt-7 max-w-sm p-5 text-left text-sm text-ink-300">
-        <p className="font-medium text-white">Common quick fixes:</p>
+      <div className="card mt-7 max-w-sm p-5 text-left text-sm text-[#50617a]">
+        <p className="font-normal text-[#061b31]">Common quick fixes:</p>
         <ul className="mt-2.5 list-inside list-disc space-y-1.5 text-xs leading-relaxed">
           <li>Double-check the card number, expiry, and CVC</li>
           <li>Try a different card — some banks block small online charges</li>
           <li>Make sure online / international payments are enabled</li>
         </ul>
       </div>
-      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <Link href="/checkout" className="btn-primary px-6 py-3 text-sm">
           Try payment again
         </Link>
@@ -46,7 +46,7 @@ export default function FailedClient() {
           Back to my draft
         </Link>
       </div>
-      <p className="mt-5 text-xs text-ink-400">
+      <p className="mt-5 text-xs text-[#64748d]">
         Stuck? Email hello@cvunicorn.com{orderId && <> and mention order <code className="rounded bg-white/8 px-1 py-0.5">{orderId}</code></>}.
       </p>
     </div>

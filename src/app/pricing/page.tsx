@@ -3,6 +3,7 @@ import Link from "next/link";
 import PricingCards from "@/components/PricingCards";
 import SectionHeading from "@/components/SectionHeading";
 import FaqList from "@/components/FaqList";
+import { T } from "@/components/i18n";
 import { JsonLd } from "@/components/JsonLd";
 import { productJsonLd, faqJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { Faq } from "@/content/faqs";
@@ -33,7 +34,7 @@ const pricingFaqs: Faq[] = [
   },
   {
     q: "What payment methods do you accept?",
-    a: "Major credit and debit cards. Payment is processed securely by our payment provider; CVUnicorn never sees or stores your card details.",
+    a: "Major credit and debit cards through Stripe Checkout. CVUnicorn never sees or stores your card details.",
   },
   {
     q: "What is your refund policy?",
@@ -54,28 +55,31 @@ export default function PricingPage() {
           ]),
         ]}
       />
-      <section className="bg-aurora px-5 pb-16 pt-10 sm:pt-16">
+      <section className="border-b border-[#e5edf5] bg-white px-5 pb-16 pt-10 sm:pt-16">
         <SectionHeading
-          eyebrow="Pricing"
-          title="Two prices. Zero fine print."
-          sub="Try the real thing for less than a dollar. Keep it for a year for less than lunch."
+          eyebrow={<T en="Pricing" zh="价格" />}
+          title={<T en="Two prices. Zero fine print." zh="两个价格，没有隐藏条款。" />}
+          sub={<T en="Try the real thing for less than a dollar. Keep it for a year for less than lunch." zh="不到 1 美元先试真实网站；全年上线价格比一顿午餐还低。" />}
         />
-        <div className="mx-auto mt-12 max-w-6xl">
+        <div className="mx-auto mt-12 max-w-[1320px]">
           <PricingCards />
         </div>
-        <p className="reveal mt-8 text-center text-sm text-ink-400">
-          Prices in USD. Taxes may apply at checkout depending on your country.
+        <p className="reveal mt-8 text-sm text-[#64748d]">
+          <T en="Prices in USD. Taxes may apply at checkout depending on your country." zh="价格以美元计。根据你所在国家或地区，结账时可能产生税费。" />
         </p>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-        <SectionHeading eyebrow="Pricing questions" title="The details, plainly" />
+      <section className="mx-auto max-w-[1320px] px-5 py-16 sm:py-20">
+        <SectionHeading
+          eyebrow={<T en="Pricing questions" zh="价格问题" />}
+          title={<T en="The details, plainly" zh="把细节说清楚" />}
+        />
         <div className="reveal mt-10">
           <FaqList faqs={pricingFaqs} />
         </div>
-        <div className="reveal mt-10 text-center">
+        <div className="reveal mt-10">
           <Link href="/start" className="btn-primary px-7 py-3.5 text-base">
-            Build my website now
+            <T en="Build my website now" zh="现在生成我的网站" />
           </Link>
         </div>
       </section>

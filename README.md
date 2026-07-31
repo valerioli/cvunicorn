@@ -2,7 +2,7 @@
 
 AI personal website builder — upload your CV, photos, projects, press, and story; get a designed personal website in minutes.
 
-**Stack:** Next.js 15 (App Router) · React 19 · Tailwind CSS 4 · TypeScript. Zero runtime SDK dependencies — AI, payments, and storage all speak REST via `fetch`.
+**Stack:** Next.js 16 (App Router) · React 19 · Tailwind CSS 4 · TypeScript. Zero runtime SDK dependencies — AI, payments, and storage all speak REST via `fetch`.
 
 ## Quick start
 
@@ -31,14 +31,42 @@ Then on [vercel.com](https://vercel.com): **Add New → Project → import `vale
 | `ACCESS_TOKEN_SECRET` | signing receipt/access links | `openssl rand -base64 32` |
 | `UPSTASH_REDIS_REST_URL/TOKEN` | persistent drafts/orders/sites | Vercel → Marketplace → Upstash Redis (free) |
 | `BLOB_READ_WRITE_TOKEN` | file uploads | Vercel → Storage → Blob |
-| `PAYMENT_PROVIDER` + Infinimoney vars | live payments | see below |
+| `PAYMENT_PROVIDER` + Stripe vars | live card payments | see below |
 
 ## Payments
 
 All payment logic sits behind one interface: `src/lib/payments/provider.ts`.
 
 - **`dev` provider** (default): a fully working simulated checkout at `/checkout/pay` so the whole flow — pricing → checkout → confirmation → receipt → access control — works end-to-end with no external account.
-- **`infini` provider** (`src/lib/payments/infini.ts`): real integration with Infini (business.infini.money). Creates orders via `POST /order` (HTTP-Signature auth: keyId + HMAC-SHA256 over method/path/date/digest), redirects customers to Infini's hosted `checkout_url`, verifies webhooks (HMAC-SHA256 over `timestamp+body`), and — as a safety net — polls `GET /order` for pending orders so payment confirmation works even before webhooks are configured. Setup: create an API key at business.infini.money → Developer, set `INFINI_API_KEY`/`INFINI_SECRET_KEY`/`INFINI_ENV` and `PAYMENT_PROVIDER=infini`, then add a webhook endpoint pointing to `https://YOUR-DOMAIN/api/payments/webhook` subscribed to `order.create` + `order.update`. Test in sandbox first (card 4000 0000 0000 0085). Note: Infini settles in USDC/USDT crypto; confirm the exact webhook payload field names against one real sandbox event in the console's "Webhook 事件" tab — the adapter parses defensively but one look validates it.
+- **`stripe` provider** (`src/lib/payments/stripe.ts`, recommended): card payments through Stripe Checkout. It creates a Checkout Session, redirects customers to Stripe's hosted checkout page, verifies `Stripe-Signature` on webhooks, stores the Stripe Checkout Session ID for reconciliation, and polls Stripe as a safety net while an order is still pending.
+- **`infini` provider** (`src/lib/payments/infini.ts`, optional): crypto payments via Infini hosted checkout. Keep it for USDT/USDC settlement experiments, but Stripe should be the production default for broad card coverage.
+
+### Stripe setup
+
+Set:
+
+```bash
+PAYMENT_PROVIDER=stripe
+STRIPE_SECRET_KEY=sk_live_...     # or sk_test_... while testing
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+In Stripe Workbench / Webhooks, create an endpoint for:
+
+```text
+https://YOUR-DOMAIN/api/payments/webhook
+```
+
+Subscribe it to:
+
+```text
+checkout.session.completed
+checkout.session.async_payment_succeeded
+checkout.session.async_payment_failed
+checkout.session.expired
+```
+
+Use `sk_test_...` plus card `4242 4242 4242 4242` for a full test checkout before switching to live keys.
 
 Provider branding never appears in CVUnicorn's UI — customers only see it on the provider's own hosted checkout page.
 
@@ -53,7 +81,7 @@ src/app/site/[slug]     serves generated sites (access-controlled)
 src/components          design system + wizard components
 src/content             plans, professions, FAQs, showcase (single source of truth)
 src/lib                 seo/jsonld, intake schema, storage, orders, access tokens
-src/lib/payments        provider interface + dev + infinimoney adapters
+src/lib/payments        provider interface + dev + Stripe + Infini adapters
 src/lib/ai/generator.ts Anthropic REST generation pipeline
 ```
 
@@ -64,7 +92,8 @@ Per-page metadata + canonicals, Schema.org JSON-LD (Organization, WebSite, Produ
 ## Production TODOs (known, deliberate v1 gaps)
 
 - **Email delivery** (receipts / magic links) — access links currently live on the success page only. Wire up Resend/Postmark in `markOrderPaid`.
-- **Infinimoney**: verify the four `TODO(infinimoney)` markers against real docs.
+- **Stripe receipts/email**: Stripe can send payment receipts, but CVUnicorn still needs app-level email delivery for dashboard magic links.
+- **Infini**: optional crypto provider; verify payload details against a real sandbox event before using it in production.
 - **Custom domains** for Unicorn Year are a manual fulfillment step for now.
 - **CV file text extraction** — the generator uses pasted bio/CV text today; parse uploaded PDF/DOCX server-side when ready.
 - `/account` lookup without a link requires emailing support; add magic-link email auth when email delivery exists.

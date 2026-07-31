@@ -18,7 +18,7 @@ export type Order = {
   /** Access window for the published site (starts at payment). */
   accessExpiresAt?: number;
   siteSlug?: string;
-  /** Provider-side order reference (e.g. Infini order_id). */
+  /** Provider-side order reference (e.g. Stripe Checkout Session ID). */
   providerRef?: string;
 };
 

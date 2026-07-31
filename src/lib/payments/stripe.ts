@@ -22,6 +22,7 @@ import type { PaymentProvider, WebhookResult } from "./provider";
  */
 
 const API = "https://api.stripe.com/v1";
+const API_VERSION = "2026-02-25.clover";
 
 function env(name: string): string {
   const v = process.env[name];
@@ -44,12 +45,15 @@ async function stripeRequest(
   method: "GET" | "POST",
   path: string,
   form?: Record<string, string | number>,
+  options?: { idempotencyKey?: string },
 ): Promise<Record<string, unknown>> {
   const res = await fetch(`${API}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${env("STRIPE_SECRET_KEY")}`,
+      "Stripe-Version": API_VERSION,
       ...(form ? { "Content-Type": "application/x-www-form-urlencoded" } : {}),
+      ...(options?.idempotencyKey ? { "Idempotency-Key": options.idempotencyKey } : {}),
     },
     body: form ? encodeForm(form) : undefined,
     cache: "no-store",
@@ -61,6 +65,14 @@ async function stripeRequest(
   return JSON.parse(text) as Record<string, unknown>;
 }
 
+function safeCompareHex(provided: string, expected: string): boolean {
+  if (provided.length !== expected.length) return false;
+  if (!/^[0-9a-f]+$/i.test(provided)) return false;
+  const a = Buffer.from(provided, "hex");
+  const b = Buffer.from(expected, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export const stripeProvider: PaymentProvider = {
   name: "stripe",
 
@@ -70,21 +82,24 @@ export const stripeProvider: PaymentProvider = {
         ? "CVUnicorn — 1 year website + custom domain"
         : "CVUnicorn — 3-day website preview";
 
-    // Stripe requires literal {CHECKOUT_SESSION_ID} un-encoded in success_url;
-    // our URLs already carry a signed token, so we just append the session id.
+    const success = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
     const session = await stripeRequest("POST", "/checkout/sessions", {
       mode: "payment",
-      success_url: successUrl,
+      success_url: success,
       cancel_url: cancelUrl,
       client_reference_id: order.id, // for webhook matching
       customer_email: order.email,
       "metadata[order_id]": order.id,
+      "metadata[plan_id]": order.planId,
       "payment_intent_data[metadata][order_id]": order.id,
+      "payment_intent_data[metadata][plan_id]": order.planId,
+      "payment_intent_data[receipt_email]": order.email,
+      "payment_intent_data[description]": desc,
       "line_items[0][quantity]": 1,
       "line_items[0][price_data][currency]": order.currency.toLowerCase(),
       "line_items[0][price_data][unit_amount]": order.amountCents,
       "line_items[0][price_data][product_data][name]": desc,
-    });
+    }, { idempotencyKey: `checkout:${order.id}` });
 
     const redirectUrl = typeof session.url === "string" ? session.url : undefined;
     const providerRef = typeof session.id === "string" ? session.id : undefined;
@@ -99,20 +114,16 @@ export const stripeProvider: PaymentProvider = {
     const sigHeader = req.headers.get("stripe-signature") ?? "";
     const secret = env("STRIPE_WEBHOOK_SECRET");
 
-    // Stripe-Signature: "t=timestamp,v1=hexsig[,v1=…]"
-    const parts = Object.fromEntries(
-      sigHeader.split(",").map((kv) => {
-        const i = kv.indexOf("=");
-        return [kv.slice(0, i), kv.slice(i + 1)];
-      }),
-    ) as { t?: string; v1?: string };
-    const t = parts.t ?? "";
-    const provided = parts.v1 ?? "";
+    // Stripe-Signature: "t=timestamp,v1=hexsig[,v1=…]".
+    const pairs = sigHeader.split(",").map((kv) => {
+      const i = kv.indexOf("=");
+      return [kv.slice(0, i), kv.slice(i + 1)] as const;
+    });
+    const t = pairs.find(([key]) => key === "t")?.[1] ?? "";
+    const signatures = pairs.filter(([key]) => key === "v1").map(([, value]) => value);
 
     const expected = createHmac("sha256", secret).update(`${t}.${raw}`).digest("hex");
-    const a = Buffer.from(provided);
-    const b = Buffer.from(expected);
-    if (!provided || a.length !== b.length || !timingSafeEqual(a, b)) {
+    if (!t || !signatures.some((sig) => safeCompareHex(sig, expected))) {
       throw new Error("Invalid Stripe webhook signature");
     }
     // Replay guard (Stripe tolerance is 5 min).

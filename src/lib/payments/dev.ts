@@ -3,7 +3,7 @@ import type { PaymentProvider, WebhookResult } from "./provider";
 /** Development provider — a fully working end-to-end flow with a local
  *  simulated checkout page. Lets the entire purchase → confirmation →
  *  receipt → access pipeline be built and tested with zero external setup.
- *  Never enable in production: set PAYMENT_PROVIDER=infinimoney there. */
+ *  Never enable in production: set PAYMENT_PROVIDER=stripe there. */
 export const devProvider: PaymentProvider = {
   name: "dev",
 

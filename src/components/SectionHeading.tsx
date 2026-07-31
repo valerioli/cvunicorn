@@ -2,24 +2,24 @@ export default function SectionHeading({
   eyebrow,
   title,
   sub,
-  center = true,
+  center = false,
 }: {
-  eyebrow?: string;
+  eyebrow?: React.ReactNode;
   title: React.ReactNode;
-  sub?: string;
+  sub?: React.ReactNode;
   center?: boolean;
 }) {
   return (
-    <div className={`reveal max-w-2xl ${center ? "mx-auto text-center" : ""}`}>
+    <div className={`reveal max-w-3xl ${center ? "mx-auto text-center" : ""}`}>
       {eyebrow && (
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-iris-300">
+        <p className="mb-4 text-xs font-normal uppercase tracking-[0.08em] text-[#64748d]">
           {eyebrow}
         </p>
       )}
-      <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.1]">
+      <h2 className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31] sm:text-4xl md:text-5xl md:leading-[1.03]">
         {title}
       </h2>
-      {sub && <p className="mt-4 text-base leading-relaxed text-ink-300 sm:text-lg">{sub}</p>}
+      {sub && <p className="mt-5 max-w-2xl text-base font-light leading-relaxed text-[#50617a] sm:text-xl">{sub}</p>}
     </div>
   );
 }
