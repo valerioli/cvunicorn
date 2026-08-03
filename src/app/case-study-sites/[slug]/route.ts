@@ -924,8 +924,6 @@ function renderSite(site: GeneratedCaseSite, lang: Lang, styleId: StyleId, origi
       color: #9b9b95;
     }
     .theme-resend .photo {
-      display: grid;
-      place-items: center;
       min-height: 520px;
       border: 1px solid #2a2a2a;
       border-radius: 16px;
@@ -934,25 +932,31 @@ function renderSite(site: GeneratedCaseSite, lang: Lang, styleId: StyleId, origi
         #050505;
       box-shadow: none;
     }
-    .theme-resend .photo img { display: none; }
+    .theme-resend .photo img {
+      display: block;
+      filter: grayscale(1) contrast(1.18) brightness(.9);
+      opacity: .9;
+      mix-blend-mode: normal;
+    }
     .theme-resend .photo::before {
       content: "";
-      width: min(290px, 56%);
-      aspect-ratio: 1;
-      border-radius: 18px;
+      position: absolute;
+      inset: 18px;
+      z-index: 2;
+      border-radius: 12px;
       background:
-        linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,0) 42%),
-        linear-gradient(225deg, rgba(146,129,247,.16), rgba(0,0,0,0) 55%),
-        #050505;
+        linear-gradient(135deg, rgba(255,255,255,.16), transparent 28%),
+        linear-gradient(180deg, transparent 46%, rgba(0,0,0,.58)),
+        repeating-linear-gradient(0deg, transparent 0 18px, rgba(255,255,255,.035) 18px 19px);
       border: 1px solid #2a2a2a;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
-      transform: rotateX(58deg) rotateZ(45deg);
-      animation: cubeturn 7s ease-in-out infinite alternate;
+      pointer-events: none;
     }
     .theme-resend .photo::after {
       content: "noah@cvunicorn.com";
       position: absolute;
+      z-index: 3;
       bottom: 28px;
+      left: 28px;
       color: #9281f7;
       font-family: var(--mono);
       font-size: 12px;
@@ -1056,14 +1060,15 @@ function renderSite(site: GeneratedCaseSite, lang: Lang, styleId: StyleId, origi
       box-shadow: none;
     }
     .theme-active .photo img {
-      opacity: .26;
-      filter: grayscale(1) contrast(1.2);
-      mix-blend-mode: screen;
+      opacity: .86;
+      filter: saturate(1.12) contrast(1.08) brightness(.82);
+      mix-blend-mode: normal;
     }
     .theme-active .photo::after {
       background:
-        linear-gradient(180deg, rgba(8,5,18,0), rgba(8,5,18,.76)),
-        radial-gradient(circle, transparent 38%, rgba(8,5,18,.62) 72%);
+        linear-gradient(180deg, rgba(8,5,18,0) 34%, rgba(8,5,18,.52)),
+        linear-gradient(90deg, rgba(124,60,255,.32), transparent 34%, rgba(0,229,255,.2)),
+        radial-gradient(circle, transparent 52%, rgba(8,5,18,.44) 82%);
       mix-blend-mode: normal;
     }
     .theme-active .ticker { display: none; }
