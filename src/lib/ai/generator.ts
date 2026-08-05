@@ -65,6 +65,13 @@ Design requirements:
 - Fully responsive, mobile-first. Use subtle but visible CSS-only animations: section reveals, image hover crops, text rhythm, sticky or anchored navigation. No external JS libraries; vanilla JS only if truly needed.
 - All CSS inline in a single <style> block.
 
+Layout quality requirements:
+- The hero must be clean, legible, and production-ready. Use CSS grid/flex with clear columns or stacked mobile sections. Do not rely on oversized absolute-positioned text that can cross into another module.
+- Hero headline text must fit its column at every viewport. Use clamp() with a conservative max size, max-width, normal line-height, overflow-wrap, and responsive breakpoints. Never let text overlap portraits, cards, nav, or adjacent sections.
+- Do not use negative margins, huge transforms, or z-index tricks that cause words to sit behind or on top of media panels.
+- Keep each module visually distinct: identity/intro, portrait, current focus, projects, writing, gallery, and contact should read as separate zones, not one fused glass card.
+- Do not create a hero that is mostly a giant decorative phrase. The person's name/headline, portrait, and the most important proof points must be easy to scan.
+
 Truthfulness requirements:
 - Use ONLY facts, links, employers, dates, metrics, quotes, social profiles, and portfolio URLs explicitly present in the brief.
 - Never invent LinkedIn, GitHub, portfolio, publication, client, employer, award, metric, quote, testimonial, location, email, or URL. If no link is provided for an item, render it as text, not as a fake anchor.
@@ -72,7 +79,9 @@ Truthfulness requirements:
 - Do not add placeholder links such as "#", "example.com", "linkedin.com/in/name", "portfolio.com", or guessed domains.
 
 Image requirements:
-- If a profile photo is provided, it must be a first-screen visual asset, not a tiny avatar. Use it as a hero portrait, editorial crop, or layered visual panel with object-fit and strong composition.
+- If a profile photo is provided, it must be a standalone first-screen visual asset, separate from text/info cards. It may sit beside the hero copy or in its own portrait panel, but it must NOT be embedded inside a "current focus", bio, stats, or other content card.
+- The profile photo should be a proper portrait region, not a narrow vertical strip or tiny avatar. Use an aspect ratio such as 4/5, 3/4, or 1/1; object-fit: cover; object-position to keep the face visible; and enough width/height to feel intentional.
+- Keep text overlays off the face. Do not place cards, captions, or translucent panels over important facial features.
 - If work sample, project, talk, or photo files are provided, build real galleries or media-led project sections. Images should be large enough to inspect, with captions from the brief when available.
 - Preserve all provided image URLs exactly. Do not replace them with stock photos or generated-looking placeholders.
 
@@ -83,7 +92,15 @@ Structure requirements — scale with the material:
 
 Head requirements:
 - <title> "{Name} — {Headline}", meta description summarizing the person, Open Graph tags, and a Schema.org Person JSON-LD script (name, jobTitle, url, sameAs from social links).
-- Semantic HTML5 landmarks (header/nav/main/section/footer), correct heading hierarchy, WCAG AA contrast.`;
+- Semantic HTML5 landmarks (header/nav/main/section/footer), correct heading hierarchy, WCAG AA contrast.
+
+Before returning the HTML, silently perform this visual QA checklist:
+1. Profile photo is separate from text cards and not a narrow strip.
+2. No headline, paragraph, card, nav item, image, or section overlaps another.
+3. No fake links or invented social/profile URLs exist.
+4. All provided images are used intentionally and remain visible.
+5. The layout would still look coherent at 390px, 768px, 1440px, and 1920px wide.
+Return only the final HTML document.`;
 
 export async function generateSiteHtml(intake: IntakeData): Promise<string> {
   const provider = chooseProvider();
