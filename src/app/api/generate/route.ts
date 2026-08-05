@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[generate] failed:", err);
     const message =
-      err instanceof Error && err.message.includes("ANTHROPIC_API_KEY")
+      err instanceof Error &&
+      (err.message.includes("OPENAI_API_KEY") || err.message.includes("ANTHROPIC_API_KEY"))
         ? err.message
         : "Generation hit a snag — please try again in a minute. If it keeps failing, contact hello@cvunicorn.com.";
     return NextResponse.json({ error: message }, { status: 502 });

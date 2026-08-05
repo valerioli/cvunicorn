@@ -1,12 +1,23 @@
 import type { IntakeData } from "@/lib/intake";
 import { getModule, type ModuleId } from "@/lib/intake";
 
-/** AI site generation — calls the Anthropic API directly over REST
- *  (no SDK dependency). Requires ANTHROPIC_API_KEY.
- *  Model can be overridden with GENERATION_MODEL. */
+/** AI site generation — calls the model provider directly over REST
+ *  (no SDK dependency).
+ *
+ *  Default: OpenAI Responses API with OPENAI_API_KEY.
+ *  Optional fallback: Anthropic Messages API with ANTHROPIC_API_KEY.
+ *
+ *  Provider can be forced with GENERATION_PROVIDER=openai|anthropic.
+ *  Model can be overridden with OPENAI_GENERATION_MODEL, ANTHROPIC_GENERATION_MODEL,
+ *  or the legacy GENERATION_MODEL.
+ */
 
-const API_URL = "https://api.anthropic.com/v1/messages";
-const DEFAULT_MODEL = process.env.GENERATION_MODEL || "claude-sonnet-4-5";
+const OPENAI_API_URL = "https://api.openai.com/v1/responses";
+const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const DEFAULT_OPENAI_MODEL =
+  process.env.OPENAI_GENERATION_MODEL || process.env.GENERATION_MODEL || "gpt-5.1";
+const DEFAULT_ANTHROPIC_MODEL =
+  process.env.ANTHROPIC_GENERATION_MODEL || process.env.GENERATION_MODEL || "claude-sonnet-4-5";
 
 function intakeToBrief(d: IntakeData): string {
   const e = d.essentials;
@@ -60,6 +71,72 @@ Head requirements:
 - Semantic HTML5 landmarks (header/nav/main/section/footer), correct heading hierarchy, WCAG AA contrast.`;
 
 export async function generateSiteHtml(intake: IntakeData): Promise<string> {
+  const provider = chooseProvider();
+  const html =
+    provider === "anthropic"
+      ? await generateWithAnthropic(intake)
+      : await generateWithOpenAI(intake);
+
+  return cleanHtml(html);
+}
+
+function chooseProvider(): "openai" | "anthropic" {
+  const forced = process.env.GENERATION_PROVIDER?.toLowerCase();
+  if (forced === "anthropic") return "anthropic";
+  if (forced === "openai") return "openai";
+  if (process.env.OPENAI_API_KEY) return "openai";
+  if (process.env.ANTHROPIC_API_KEY) return "anthropic";
+  return "openai";
+}
+
+async function generateWithOpenAI(intake: IntakeData): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY is not configured. Add it to your environment to enable website generation.",
+    );
+  }
+
+  const res = await fetch(OPENAI_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: DEFAULT_OPENAI_MODEL,
+      instructions: SYSTEM_PROMPT,
+      input: `Build this person's website.\n\n${intakeToBrief(intake)}`,
+      max_output_tokens: 32000,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`OpenAI generation API error (${res.status}): ${text.slice(0, 300)}`);
+  }
+
+  const json = (await res.json()) as {
+    output_text?: string;
+    output?: {
+      content?: { type?: string; text?: string }[];
+    }[];
+  };
+
+  if (typeof json.output_text === "string" && json.output_text.trim()) {
+    return json.output_text;
+  }
+
+  return (
+    json.output
+      ?.flatMap((item) => item.content ?? [])
+      .filter((content) => content.type === "output_text" || content.type === "text")
+      .map((content) => content.text ?? "")
+      .join("") ?? ""
+  );
+}
+
+async function generateWithAnthropic(intake: IntakeData): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error(
@@ -67,7 +144,7 @@ export async function generateSiteHtml(intake: IntakeData): Promise<string> {
     );
   }
 
-  const res = await fetch(API_URL, {
+  const res = await fetch(ANTHROPIC_API_URL, {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
@@ -75,7 +152,7 @@ export async function generateSiteHtml(intake: IntakeData): Promise<string> {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: DEFAULT_MODEL,
+      model: DEFAULT_ANTHROPIC_MODEL,
       max_tokens: 32000,
       system: SYSTEM_PROMPT,
       messages: [
@@ -95,12 +172,16 @@ export async function generateSiteHtml(intake: IntakeData): Promise<string> {
   const json = (await res.json()) as {
     content?: { type: string; text?: string }[];
   };
-  let html =
+  return (
     json.content
       ?.filter((b) => b.type === "text")
       .map((b) => b.text ?? "")
-      .join("") ?? "";
+      .join("") ?? ""
+  );
+}
 
+function cleanHtml(raw: string): string {
+  let html = raw;
   // Strip accidental markdown fences and any preamble before <!doctype…
   html = html.replace(/^```(?:html)?\s*/i, "").replace(/```\s*$/, "");
   const docStart = html.search(/<!doctype html/i);

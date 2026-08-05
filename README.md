@@ -12,7 +12,7 @@ cp .env.example .env.local   # fill in what you have (everything has dev fallbac
 npm run dev                  # http://localhost:3000
 ```
 
-With no env vars at all you can still run the full product loop locally: build a draft at `/start`, "pay" through the simulated checkout, and (with `ANTHROPIC_API_KEY` set) generate a real site.
+With no env vars at all you can still run the full product loop locally: build a draft at `/start`, "pay" through the simulated checkout, and (with `OPENAI_API_KEY` set) generate a real site.
 
 ## Deploy to GitHub + Vercel
 
@@ -27,7 +27,7 @@ Then on [vercel.com](https://vercel.com): **Add New → Project → import `vale
 | Variable | Needed for | Where to get it |
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | correct links, sitemap, OG | your production URL |
-| `ANTHROPIC_API_KEY` | website generation | console.anthropic.com |
+| `OPENAI_API_KEY` | website generation | platform.openai.com |
 | `ACCESS_TOKEN_SECRET` | signing receipt/access links | `openssl rand -base64 32` |
 | `UPSTASH_REDIS_REST_URL/TOKEN` | persistent drafts/orders/sites | Vercel → Marketplace → Upstash Redis (free) |
 | `BLOB_READ_WRITE_TOKEN` | file uploads | Vercel → Storage → Blob |
@@ -82,7 +82,7 @@ src/components          design system + wizard components
 src/content             plans, professions, FAQs, showcase (single source of truth)
 src/lib                 seo/jsonld, intake schema, storage, orders, access tokens
 src/lib/payments        provider interface + dev + Stripe + Infini adapters
-src/lib/ai/generator.ts Anthropic REST generation pipeline
+src/lib/ai/generator.ts OpenAI REST generation pipeline, with optional Anthropic fallback
 ```
 
 ## SEO / AEO
