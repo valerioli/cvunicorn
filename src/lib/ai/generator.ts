@@ -4,16 +4,19 @@ import { getModule, type ModuleId } from "@/lib/intake";
 /** AI site generation — calls the model provider directly over REST
  *  (no SDK dependency).
  *
- *  Default: OpenAI Responses API with OPENAI_API_KEY.
- *  Optional fallback: Anthropic Messages API with ANTHROPIC_API_KEY.
+ *  Default: OpenRouter Chat Completions API with OPENROUTER_API_KEY.
+ *  Fallbacks: OpenAI Responses API with OPENAI_API_KEY, or Anthropic Messages API.
  *
- *  Provider can be forced with GENERATION_PROVIDER=openai|anthropic.
- *  Model can be overridden with OPENAI_GENERATION_MODEL, ANTHROPIC_GENERATION_MODEL,
- *  or the legacy GENERATION_MODEL.
+ *  Provider can be forced with GENERATION_PROVIDER=openrouter|openai|anthropic.
+ *  Model can be overridden with OPENROUTER_GENERATION_MODEL, OPENAI_GENERATION_MODEL,
+ *  ANTHROPIC_GENERATION_MODEL, or the legacy GENERATION_MODEL.
  */
 
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const DEFAULT_OPENROUTER_MODEL =
+  process.env.OPENROUTER_GENERATION_MODEL || process.env.GENERATION_MODEL || "openai/gpt-5.5";
 const DEFAULT_OPENAI_MODEL =
   process.env.OPENAI_GENERATION_MODEL || process.env.GENERATION_MODEL || "gpt-5.2";
 const DEFAULT_ANTHROPIC_MODEL =
@@ -72,21 +75,74 @@ Head requirements:
 
 export async function generateSiteHtml(intake: IntakeData): Promise<string> {
   const provider = chooseProvider();
-  const html =
-    provider === "anthropic"
-      ? await generateWithAnthropic(intake)
-      : await generateWithOpenAI(intake);
+  const html = await (provider === "openrouter"
+    ? generateWithOpenRouter(intake)
+    : provider === "anthropic"
+      ? generateWithAnthropic(intake)
+      : generateWithOpenAI(intake));
 
   return cleanHtml(html);
 }
 
-function chooseProvider(): "openai" | "anthropic" {
+function chooseProvider(): "openrouter" | "openai" | "anthropic" {
   const forced = process.env.GENERATION_PROVIDER?.toLowerCase();
+  if (forced === "openrouter") return "openrouter";
   if (forced === "anthropic") return "anthropic";
   if (forced === "openai") return "openai";
+  if (process.env.OPENROUTER_API_KEY) return "openrouter";
   if (process.env.OPENAI_API_KEY) return "openai";
   if (process.env.ANTHROPIC_API_KEY) return "anthropic";
-  return "openai";
+  return "openrouter";
+}
+
+async function generateWithOpenRouter(intake: IntakeData): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not configured. Add it to your environment to enable website generation.",
+    );
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cvunicorn.com";
+  const res = await fetch(OPENROUTER_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": siteUrl,
+      "X-Title": "CVUnicorn",
+    },
+    body: JSON.stringify({
+      model: DEFAULT_OPENROUTER_MODEL,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `Build this person's website.\n\n${intakeToBrief(intake)}`,
+        },
+      ],
+      max_tokens: 32000,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await generationApiError("OpenRouter", res));
+  }
+
+  const json = (await res.json()) as {
+    choices?: {
+      message?: {
+        content?: string | { type?: string; text?: string }[];
+      };
+    }[];
+  };
+  const content = json.choices?.[0]?.message?.content;
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content.map((item) => item.text ?? "").join("");
+  }
+  return "";
 }
 
 async function generateWithOpenAI(intake: IntakeData): Promise<string> {
@@ -178,7 +234,10 @@ async function generateWithAnthropic(intake: IntakeData): Promise<string> {
   );
 }
 
-async function generationApiError(provider: "OpenAI" | "Anthropic", res: Response): Promise<string> {
+async function generationApiError(
+  provider: "OpenRouter" | "OpenAI" | "Anthropic",
+  res: Response,
+): Promise<string> {
   const text = await res.text().catch(() => "");
   let message = text.slice(0, 300);
   let code = "";
@@ -191,12 +250,12 @@ async function generationApiError(provider: "OpenAI" | "Anthropic", res: Respons
   } catch {}
 
   if (
-    provider === "OpenAI" &&
+    (provider === "OpenAI" || provider === "OpenRouter") &&
     (code === "credit_balance_exhausted" ||
       code === "insufficient_quota" ||
-      /no credits remaining/i.test(message))
+      /no credits remaining|insufficient credits|insufficient balance|quota/i.test(message))
   ) {
-    return "OpenAI API has no credits remaining. Add credits in OpenAI billing, then try generation again.";
+    return `${provider} API has no credits remaining. Add credits in ${provider} billing, then try generation again.`;
   }
 
   return `${provider} generation API error (${res.status}): ${message}`;

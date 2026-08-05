@@ -59,8 +59,10 @@ export async function POST(req: NextRequest) {
     console.error("[generate] failed:", err);
     const message =
       err instanceof Error &&
-      (err.message.includes("OPENAI_API_KEY") ||
+      (err.message.includes("OPENROUTER_API_KEY") ||
+        err.message.includes("OPENAI_API_KEY") ||
         err.message.includes("ANTHROPIC_API_KEY") ||
+        err.message.includes("OpenRouter API has no credits remaining") ||
         err.message.includes("OpenAI API has no credits remaining"))
         ? err.message
         : "Generation hit a snag — please try again in a minute. If it keeps failing, contact support.";
