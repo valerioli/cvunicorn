@@ -28,6 +28,7 @@ Then on [vercel.com](https://vercel.com): **Add New → Project → import `vale
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | correct links, sitemap, OG | your production URL |
 | `OPENAI_API_KEY` | website generation | platform.openai.com |
+| `NEXT_PUBLIC_SUPPORT_EMAIL` | customer support copy | your support mailbox or forwarding alias |
 | `ACCESS_TOKEN_SECRET` | signing receipt/access links | `openssl rand -base64 32` |
 | `UPSTASH_REDIS_REST_URL/TOKEN` | persistent drafts/orders/sites | Vercel → Marketplace → Upstash Redis (free) |
 | `BLOB_READ_WRITE_TOKEN` | file uploads | Vercel → Storage → Blob |

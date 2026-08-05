@@ -15,7 +15,7 @@ import { getModule, type ModuleId } from "@/lib/intake";
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const DEFAULT_OPENAI_MODEL =
-  process.env.OPENAI_GENERATION_MODEL || process.env.GENERATION_MODEL || "gpt-5.1";
+  process.env.OPENAI_GENERATION_MODEL || process.env.GENERATION_MODEL || "gpt-5.2";
 const DEFAULT_ANTHROPIC_MODEL =
   process.env.ANTHROPIC_GENERATION_MODEL || process.env.GENERATION_MODEL || "claude-sonnet-4-5";
 
@@ -112,8 +112,7 @@ async function generateWithOpenAI(intake: IntakeData): Promise<string> {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`OpenAI generation API error (${res.status}): ${text.slice(0, 300)}`);
+    throw new Error(await generationApiError("OpenAI", res));
   }
 
   const json = (await res.json()) as {
@@ -165,8 +164,7 @@ async function generateWithAnthropic(intake: IntakeData): Promise<string> {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Generation API error (${res.status}): ${text.slice(0, 300)}`);
+    throw new Error(await generationApiError("Anthropic", res));
   }
 
   const json = (await res.json()) as {
@@ -178,6 +176,30 @@ async function generateWithAnthropic(intake: IntakeData): Promise<string> {
       .map((b) => b.text ?? "")
       .join("") ?? ""
   );
+}
+
+async function generationApiError(provider: "OpenAI" | "Anthropic", res: Response): Promise<string> {
+  const text = await res.text().catch(() => "");
+  let message = text.slice(0, 300);
+  let code = "";
+  try {
+    const parsed = JSON.parse(text) as {
+      error?: { message?: string; code?: string; type?: string };
+    };
+    message = parsed.error?.message ?? message;
+    code = parsed.error?.code ?? parsed.error?.type ?? "";
+  } catch {}
+
+  if (
+    provider === "OpenAI" &&
+    (code === "credit_balance_exhausted" ||
+      code === "insufficient_quota" ||
+      /no credits remaining/i.test(message))
+  ) {
+    return "OpenAI API has no credits remaining. Add credits in OpenAI billing, then try generation again.";
+  }
+
+  return `${provider} generation API error (${res.status}): ${message}`;
 }
 
 function cleanHtml(raw: string): string {

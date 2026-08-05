@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -52,7 +53,7 @@ export default function TermsPage() {
         },
         {
           h: "7. Contact",
-          body: ["Questions about these terms: hello@cvunicorn.com."],
+          body: [`Questions about these terms: ${SUPPORT_EMAIL}.`],
         },
       ]}
     />

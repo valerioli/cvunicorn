@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 type StatusPayload = {
   orderId: string;
@@ -72,7 +73,7 @@ export default function AccountClient() {
         </p>
         <p className="mt-4 text-sm text-[#64748d]">
           Can't find it? Email{" "}
-          <a href="mailto:hello@cvunicorn.com" className="text-[#533afd] hover:underline">hello@cvunicorn.com</a>{" "}
+          <a href={SUPPORT_MAILTO} className="text-[#533afd] hover:underline">{SUPPORT_EMAIL}</a>{" "}
           from your purchase address and we'll resend it.
         </p>
         <Link href="/start" className="btn-primary mt-8 inline-flex px-6 py-3 text-sm">

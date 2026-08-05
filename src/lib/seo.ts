@@ -1,3 +1,5 @@
+import { SUPPORT_EMAIL } from "@/lib/contact";
+
 export const SITE = {
   name: "CVUnicorn",
   tagline: "Your career, made unforgettable",
@@ -5,7 +7,7 @@ export const SITE = {
   description:
     "CVUnicorn turns your resume, work, and story into a stunning personal website in minutes. Upload your CV, photos, projects, press, and achievements — AI designs a site worthy of your career.",
   twitter: "@cvunicorn",
-  email: "hello@cvunicorn.com",
+  email: SUPPORT_EMAIL,
 } as const;
 
 export function absoluteUrl(path = "/"): string {
@@ -94,4 +96,3 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
     })),
   };
 }
-

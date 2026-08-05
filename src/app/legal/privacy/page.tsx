@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -40,12 +41,12 @@ export default function PrivacyPage() {
         {
           h: "5. Retention & deletion",
           body: [
-            "Expired sites go offline but content is retained so you can renew. You can request deletion of your content and data at any time at hello@cvunicorn.com, and we will remove it within 30 days.",
+            `Expired sites go offline but content is retained so you can renew. You can request deletion of your content and data at any time at ${SUPPORT_EMAIL}, and we will remove it within 30 days.`,
           ],
         },
         {
           h: "6. Contact",
-          body: ["Privacy questions: hello@cvunicorn.com."],
+          body: [`Privacy questions: ${SUPPORT_EMAIL}.`],
         },
       ]}
     />

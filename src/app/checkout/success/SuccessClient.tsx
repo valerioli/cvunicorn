@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 type StatusPayload = {
   status: "pending" | "paid" | "failed" | "canceled";
@@ -130,7 +131,7 @@ export default function SuccessClient() {
           Your payment is taking longer than usual to confirm. This page is
           safe to close — we'll email you the moment it clears. If you were
           charged and don't hear from us within an hour, contact
-          hello@cvunicorn.com with order <code className="rounded bg-white/8 px-1.5 py-0.5 text-xs">{orderId}</code>.
+          {` ${SUPPORT_EMAIL} `}with order <code className="rounded bg-white/8 px-1.5 py-0.5 text-xs">{orderId}</code>.
         </p>
       </Shell>
     );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
@@ -34,7 +35,7 @@ export default function RefundsPage() {
         {
           h: "How to request",
           body: [
-            "Email hello@cvunicorn.com from the address used at checkout, with your receipt number. Refunds are returned to the original payment method within 5–10 business days.",
+            `Email ${SUPPORT_EMAIL} from the address used at checkout, with your receipt number. Refunds are returned to the original payment method within 5–10 business days.`,
           ],
         },
       ]}

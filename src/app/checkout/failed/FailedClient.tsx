@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export default function FailedClient() {
   const params = useSearchParams();
@@ -47,7 +48,7 @@ export default function FailedClient() {
         </Link>
       </div>
       <p className="mt-5 text-xs text-[#64748d]">
-        Stuck? Email hello@cvunicorn.com{orderId && <> and mention order <code className="rounded bg-white/8 px-1 py-0.5">{orderId}</code></>}.
+        Stuck? Email {SUPPORT_EMAIL}{orderId && <> and mention order <code className="rounded bg-white/8 px-1 py-0.5">{orderId}</code></>}.
       </p>
     </div>
   );
