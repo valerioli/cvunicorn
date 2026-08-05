@@ -84,14 +84,30 @@ export async function generateSiteHtml(intake: IntakeData): Promise<string> {
   return cleanHtml(html);
 }
 
+export function getGenerationDiagnostics(): {
+  provider: "openrouter" | "openai" | "anthropic";
+  openRouterKeyConfigured: boolean;
+  openAiKeyConfigured: boolean;
+  anthropicKeyConfigured: boolean;
+  openRouterModel: string;
+} {
+  return {
+    provider: chooseProvider(),
+    openRouterKeyConfigured: Boolean(process.env.OPENROUTER_API_KEY?.trim()),
+    openAiKeyConfigured: Boolean(process.env.OPENAI_API_KEY?.trim()),
+    anthropicKeyConfigured: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+    openRouterModel: DEFAULT_OPENROUTER_MODEL,
+  };
+}
+
 function chooseProvider(): "openrouter" | "openai" | "anthropic" {
-  const forced = process.env.GENERATION_PROVIDER?.toLowerCase();
+  const forced = process.env.GENERATION_PROVIDER?.trim().toLowerCase();
   if (forced === "openrouter") return "openrouter";
   if (forced === "anthropic") return "anthropic";
   if (forced === "openai") return "openai";
-  if (process.env.OPENROUTER_API_KEY) return "openrouter";
-  if (process.env.OPENAI_API_KEY) return "openai";
-  if (process.env.ANTHROPIC_API_KEY) return "anthropic";
+  if (process.env.OPENROUTER_API_KEY?.trim()) return "openrouter";
+  if (process.env.OPENAI_API_KEY?.trim()) return "openai";
+  if (process.env.ANTHROPIC_API_KEY?.trim()) return "anthropic";
   return "openrouter";
 }
 
