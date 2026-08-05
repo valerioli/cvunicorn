@@ -38,7 +38,7 @@ export default function AccountClient() {
   }, [orderId, token]);
 
   useEffect(() => {
-    if (data?.siteSlug) setSiteUrl(`/site/${data.siteSlug}`);
+    if (data?.siteSlug) setSiteUrl(publicSiteUrl(data.siteSlug));
   }, [data]);
 
   async function generate() {
@@ -165,7 +165,7 @@ export default function AccountClient() {
                 rel="noopener"
                 className="mt-3 block truncate rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-sm font-normal text-[#533afd] hover:bg-[#e8e9ff]"
               >
-                {typeof window !== "undefined" ? window.location.origin : ""}{siteUrl} ↗
+                {siteUrl} ↗
               </a>
               <div className="mt-4 flex flex-wrap gap-2.5">
                 <button type="button" onClick={generate} disabled={generating} className="btn-ghost px-4 py-2 text-xs disabled:opacity-50">
@@ -201,6 +201,27 @@ export default function AccountClient() {
       )}
     </Shell>
   );
+}
+
+function publicSiteUrl(slug: string): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configuredUrl) {
+    try {
+      const url = new URL(configuredUrl);
+      if (url.hostname !== "localhost" && url.hostname !== "127.0.0.1") {
+        return `${url.protocol}//${slug}.${url.hostname}`;
+      }
+    } catch {}
+  }
+
+  if (typeof window === "undefined") return `/site/${slug}`;
+  const { protocol, hostname, origin } = window.location;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return `${origin}/site/${slug}`;
+  }
+  const parts = hostname.split(".");
+  const rootHost = parts.length > 2 ? parts.slice(-2).join(".") : hostname;
+  return `${protocol}//${slug}.${rootHost}`;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {

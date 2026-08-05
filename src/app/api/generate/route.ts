@@ -4,7 +4,7 @@ import { verifyAccessToken } from "@/lib/access";
 import { kvGet, kvSet } from "@/lib/storage";
 import { generateSiteHtml, slugify } from "@/lib/ai/generator";
 import type { IntakeData } from "@/lib/intake";
-import { SITE_TTL, type SiteRecord } from "@/lib/sites";
+import { SITE_TTL, siteUrlForSlug, type SiteRecord } from "@/lib/sites";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // generation can take a few minutes
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const html = await generateSiteHtml(draft);
-    const slug = order.siteSlug ?? slugify(draft.essentials.fullName);
+    const slug = order.siteSlug ?? (await uniqueSiteSlug(draft.essentials.fullName));
     const record: SiteRecord = {
       slug,
       orderId: order.id,
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       order.siteSlug = slug;
       await saveOrder(order);
     }
-    return NextResponse.json({ siteUrl: `/site/${slug}` });
+    return NextResponse.json({ siteUrl: siteUrlForSlug(slug) });
   } catch (err) {
     console.error("[generate] failed:", err);
     const message =
@@ -68,4 +68,14 @@ export async function POST(req: NextRequest) {
         : "Generation hit a snag — please try again in a minute. If it keeps failing, contact support.";
     return NextResponse.json({ error: message }, { status: 502 });
   }
+}
+
+async function uniqueSiteSlug(name: string): Promise<string> {
+  const base = slugify(name, { randomSuffix: false });
+  for (let i = 0; i < 20; i += 1) {
+    const candidate = i === 0 ? base : `${base}-${i + 1}`;
+    const existing = await kvGet<SiteRecord>(`site:${candidate}`);
+    if (!existing) return candidate;
+  }
+  return slugify(name);
 }

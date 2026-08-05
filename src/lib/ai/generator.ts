@@ -60,9 +60,21 @@ const SYSTEM_PROMPT = `You are the design engine of CVUnicorn, producing persona
 You receive a content brief about one person. Return a COMPLETE, standalone HTML document (doctype to </html>) — no explanations, no markdown fences, HTML only.
 
 Design requirements:
-- Sophisticated, modern, editorial. Confident typography (Google Fonts via <link>), generous whitespace, a restrained palette derived from the person's field. Dark or light theme — whichever serves the content.
-- Fully responsive, mobile-first. Subtle CSS-only animations (scroll-margin, hover states, keyframe fades). No external JS libraries; vanilla JS only if truly needed.
+- Sophisticated, modern, editorial. The result should feel like a distinct personal brand system, not a generic AI landing page. Choose one strong direction: modern editorial, precise SaaS minimalism, high-contrast studio portfolio, kinetic creative-tech, or warm cultural magazine.
+- Confident typography (Google Fonts via <link>), generous whitespace, a restrained but memorable palette derived from the person's field. Dark or light theme — whichever serves the content. Avoid generic rounded cards, bland gradients, emoji decoration, and template-like "About / Experience / Contact" sameness unless the brief is truly sparse.
+- Fully responsive, mobile-first. Use subtle but visible CSS-only animations: section reveals, image hover crops, text rhythm, sticky or anchored navigation. No external JS libraries; vanilla JS only if truly needed.
 - All CSS inline in a single <style> block.
+
+Truthfulness requirements:
+- Use ONLY facts, links, employers, dates, metrics, quotes, social profiles, and portfolio URLs explicitly present in the brief.
+- Never invent LinkedIn, GitHub, portfolio, publication, client, employer, award, metric, quote, testimonial, location, email, or URL. If no link is provided for an item, render it as text, not as a fake anchor.
+- In JSON-LD, include sameAs only when social profile URLs are explicitly provided. If none are provided, omit sameAs entirely.
+- Do not add placeholder links such as "#", "example.com", "linkedin.com/in/name", "portfolio.com", or guessed domains.
+
+Image requirements:
+- If a profile photo is provided, it must be a first-screen visual asset, not a tiny avatar. Use it as a hero portrait, editorial crop, or layered visual panel with object-fit and strong composition.
+- If work sample, project, talk, or photo files are provided, build real galleries or media-led project sections. Images should be large enough to inspect, with captions from the brief when available.
+- Preserve all provided image URLs exactly. Do not replace them with stock photos or generated-looking placeholders.
 
 Structure requirements — scale with the material:
 - RICH briefs (many modules: work history, photos, writing, projects, press…) become a MULTI-SECTION magazine-style site with a fixed nav linking to distinct, differently-designed sections (like a CMO site with Work / Field / Projects / Writings / About). Every substantial module gets its own section with its own visual treatment: galleries for photos, stat blocks for business results, editorial lists for articles, quote cards for testimonials, timelines for talks.
@@ -289,7 +301,7 @@ function cleanHtml(raw: string): string {
   return html.trim();
 }
 
-export function slugify(name: string): string {
+export function slugify(name: string, opts?: { randomSuffix?: boolean }): string {
   const base = name
     .toLowerCase()
     .normalize("NFKD")
@@ -297,6 +309,7 @@ export function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
+  if (opts?.randomSuffix === false) return base || "site";
   const suffix = Math.random().toString(36).slice(2, 6);
   return base ? `${base}-${suffix}` : `site-${suffix}`;
 }
