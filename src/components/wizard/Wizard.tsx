@@ -209,9 +209,32 @@ export default function Wizard() {
               hint={language === "zh" ? "PDF 或 Word，这是网站的骨架" : "PDF or Word — the backbone of your site"}
               accept=".pdf,.doc,.docx,.txt,.md"
               files={data.essentials.cv ? [data.essentials.cv] : []}
-              onChange={(files) => update((d) => ({ ...d, essentials: { ...d.essentials, cv: files[0] ?? null } }))}
+              onChange={(files) =>
+                update((d) => {
+                  const cv = files[0] ?? null;
+                  return {
+                    ...d,
+                    essentials: {
+                      ...d.essentials,
+                      cv,
+                      cvText: cv?.extractedText ?? "",
+                    },
+                  };
+                })
+              }
             />
           </div>
+          {data.essentials.cv && (
+            <p className="mt-3 text-xs leading-relaxed text-[#64748d]">
+              {data.essentials.cv.extractedCharCount
+                ? language === "zh"
+                  ? `已从简历中提取 ${data.essentials.cv.extractedCharCount.toLocaleString()} 个字符，会用于生成网站内容。`
+                  : `Extracted ${data.essentials.cv.extractedCharCount.toLocaleString()} characters from your resume for site generation.`
+                : language === "zh"
+                  ? "没有从这份简历中提取到可读文本。扫描版 PDF 或旧 .doc 建议转成 PDF/DOCX，或把简历文字粘贴到下面。"
+                  : "No readable text was extracted. For scanned PDFs or legacy .doc files, export as PDF/DOCX or paste the resume text below."}
+            </p>
+          )}
           <div className="mt-5">
             <TextArea
               label={language === "zh" ? "简短介绍" : "Short bio or introduction"}

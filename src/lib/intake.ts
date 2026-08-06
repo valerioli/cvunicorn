@@ -7,6 +7,9 @@ export type UploadedFile = {
   url: string; // blob URL or /api/upload?id=…
   size: number;
   type: string;
+  extractedText?: string;
+  extractedCharCount?: number;
+  extractionError?: string;
 };
 
 export type FieldType = "text" | "textarea" | "url" | "date";

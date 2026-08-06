@@ -158,6 +158,11 @@ export function FileDrop(props: {
               className="flex items-center gap-2 rounded-[4px] border border-[#e5edf5] bg-[#f8fafd] py-1.5 pl-3 pr-1.5 text-xs text-[#50617a]"
             >
               <span className="max-w-40 truncate">{f.name}</span>
+              {typeof f.extractedCharCount === "number" && f.extractedCharCount > 0 && (
+                <span className="rounded-[3px] bg-white px-1.5 py-0.5 text-[#1f7a4d]">
+                  text extracted
+                </span>
+              )}
               <button
                 type="button"
                 aria-label={`Remove ${f.name}`}
@@ -171,6 +176,17 @@ export function FileDrop(props: {
             </li>
           ))}
         </ul>
+      )}
+      {props.files.some((f) => f.extractionError) && (
+        <div className="mt-2 space-y-1">
+          {props.files
+            .filter((f) => f.extractionError)
+            .map((f) => (
+              <p key={`${f.id}-extract-error`} className="text-xs leading-relaxed text-[#533afd]">
+                {f.extractionError}
+              </p>
+            ))}
+        </div>
       )}
     </div>
   );

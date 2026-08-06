@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { memFilePut, memFileGet } from "@/lib/storage";
+import { extractDocumentText } from "@/lib/documentText";
 
 export const runtime = "nodejs";
 
@@ -9,11 +10,28 @@ const ALLOWED_TYPES = [
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
+const TEXT_EXTRACTION_PREFIXES = ["text/"];
+const TEXT_EXTRACTION_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 
-function typeAllowed(type: string): boolean {
+function typeAllowed(name: string, type: string): boolean {
+  const lowerName = name.toLowerCase();
   return (
     ALLOWED_PREFIXES.some((p) => type.startsWith(p)) ||
-    ALLOWED_TYPES.includes(type)
+    ALLOWED_TYPES.includes(type) ||
+    /\.(pdf|docx?|txt|md|markdown)$/.test(lowerName)
+  );
+}
+
+function textExtractionAllowed(name: string, type: string): boolean {
+  const lowerName = name.toLowerCase();
+  return (
+    TEXT_EXTRACTION_PREFIXES.some((p) => type.startsWith(p)) ||
+    TEXT_EXTRACTION_TYPES.includes(type) ||
+    /\.(pdf|docx?|txt|md|markdown)$/.test(lowerName)
   );
 }
 
@@ -29,7 +47,7 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: "File exceeds 8MB limit" }, { status: 413 });
   }
-  if (!typeAllowed(file.type)) {
+  if (!typeAllowed(file.name, file.type)) {
     return NextResponse.json(
       { error: "Unsupported file type. Use images, PDF, or Word documents." },
       { status: 415 },
@@ -39,6 +57,14 @@ export async function POST(req: NextRequest) {
   const id = crypto.randomUUID();
   const safeName = file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 120);
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const extraction = textExtractionAllowed(file.name, file.type)
+    ? await extractDocumentText({
+        bytes,
+        name: file.name,
+        type: file.type || "application/octet-stream",
+      })
+    : null;
 
   if (blobToken) {
     // Vercel Blob REST API — no SDK needed.
@@ -52,9 +78,7 @@ export async function POST(req: NextRequest) {
           "content-type": file.type || "application/octet-stream",
           "x-add-random-suffix": "0",
         },
-        body: file.stream(),
-        // @ts-expect-error duplex is required by node fetch for streaming bodies
-        duplex: "half",
+        body: bytes,
       },
     );
     if (!res.ok) {
@@ -67,11 +91,13 @@ export async function POST(req: NextRequest) {
       url: blob.url,
       size: file.size,
       type: file.type,
+      extractedText: extraction?.text,
+      extractedCharCount: extraction?.charCount,
+      extractionError: extraction?.error,
     });
   }
 
   // Dev fallback: keep in memory, serve back via GET.
-  const bytes = new Uint8Array(await file.arrayBuffer());
   memFilePut(id, bytes, file.type || "application/octet-stream", safeName);
   return NextResponse.json({
     id,
@@ -79,6 +105,9 @@ export async function POST(req: NextRequest) {
     url: `/api/upload?id=${id}`,
     size: file.size,
     type: file.type,
+    extractedText: extraction?.text,
+    extractedCharCount: extraction?.charCount,
+    extractionError: extraction?.error,
   });
 }
 
