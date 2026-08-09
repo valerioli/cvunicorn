@@ -51,7 +51,9 @@ Set:
 ```bash
 PAYMENT_PROVIDER=stripe
 STRIPE_SECRET_KEY=sk_live_...     # or sk_test_... while testing
-STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_WEBHOOK_SECRET=whsec_...   # live webhook endpoint secret
+# Optional if a Stripe test/sandbox webhook endpoint also points to production:
+STRIPE_TEST_WEBHOOK_SECRET=whsec_...
 ```
 
 In Stripe Workbench / Webhooks, create an endpoint for:
@@ -68,6 +70,12 @@ checkout.session.async_payment_succeeded
 checkout.session.async_payment_failed
 checkout.session.expired
 ```
+
+Stripe live mode and test mode have separate webhook signing secrets. If both
+endpoints point at production, set both `STRIPE_WEBHOOK_SECRET` and
+`STRIPE_TEST_WEBHOOK_SECRET` so test-mode retries do not fail signature
+verification. You can also set `STRIPE_WEBHOOK_SECRETS` to a comma-separated
+list of accepted `whsec_...` values.
 
 Use `sk_test_...` plus card `4242 4242 4242 4242` for a full test checkout before switching to live keys.
 

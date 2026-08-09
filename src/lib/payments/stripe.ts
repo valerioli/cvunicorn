@@ -15,7 +15,9 @@ import type { PaymentProvider, WebhookResult } from "./provider";
  *  Env:
  *    PAYMENT_PROVIDER=stripe
  *    STRIPE_SECRET_KEY=sk_test_… (test) or sk_live_… (live)
- *    STRIPE_WEBHOOK_SECRET=whsec_…  (from the webhook endpoint you create)
+ *    STRIPE_WEBHOOK_SECRET=whsec_…  (from the live webhook endpoint)
+ *    STRIPE_TEST_WEBHOOK_SECRET=whsec_…  (optional, from the test webhook endpoint)
+ *    STRIPE_WEBHOOK_SECRETS=whsec_…,whsec_…  (optional alternative)
  *
  *  Test mode needs NO documents: create a Stripe account, copy the test
  *  keys, use card 4242 4242 4242 4242 (any future expiry / any CVC).
@@ -32,6 +34,24 @@ function env(name: string): string {
     );
   }
   return v;
+}
+
+function stripeWebhookSecrets(): string[] {
+  const secrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_TEST_WEBHOOK_SECRET,
+    ...(process.env.STRIPE_WEBHOOK_SECRETS?.split(",") ?? []),
+  ]
+    .map((secret) => secret?.trim())
+    .filter((secret): secret is string => Boolean(secret));
+
+  if (secrets.length === 0) {
+    throw new Error(
+      "STRIPE_WEBHOOK_SECRET is not set. Add the Stripe webhook signing secret to the environment.",
+    );
+  }
+
+  return Array.from(new Set(secrets));
 }
 
 /** Stripe expects application/x-www-form-urlencoded with bracketed nesting. */
@@ -112,7 +132,7 @@ export const stripeProvider: PaymentProvider = {
   async handleWebhook(req: Request): Promise<WebhookResult> {
     const raw = await req.text();
     const sigHeader = req.headers.get("stripe-signature") ?? "";
-    const secret = env("STRIPE_WEBHOOK_SECRET");
+    const secrets = stripeWebhookSecrets();
 
     // Stripe-Signature: "t=timestamp,v1=hexsig[,v1=…]".
     const pairs = sigHeader.split(",").map((kv) => {
@@ -122,8 +142,12 @@ export const stripeProvider: PaymentProvider = {
     const t = pairs.find(([key]) => key === "t")?.[1] ?? "";
     const signatures = pairs.filter(([key]) => key === "v1").map(([, value]) => value);
 
-    const expected = createHmac("sha256", secret).update(`${t}.${raw}`).digest("hex");
-    if (!t || !signatures.some((sig) => safeCompareHex(sig, expected))) {
+    const signedPayload = `${t}.${raw}`;
+    const matchesSignature = secrets.some((secret) => {
+      const expected = createHmac("sha256", secret).update(signedPayload).digest("hex");
+      return signatures.some((sig) => safeCompareHex(sig, expected));
+    });
+    if (!t || !matchesSignature) {
       throw new Error("Invalid Stripe webhook signature");
     }
     // Replay guard (Stripe tolerance is 5 min).
