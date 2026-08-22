@@ -104,8 +104,8 @@ export const caseStudySites: GeneratedCaseSite[] = [
     heroImage: "https://raw.githubusercontent.com/valerioli/portfolio-site/main/headshot.jpg",
     externalUrl: "https://valerio.cvunicorn.com",
     role: {
-      en: "Chief Marketing Officer, AInfinity",
-      zh: "AInfinity 首席营销官",
+      en: "General Manager, AInfinity",
+      zh: "AInfinity 总经理",
     },
     industry: { en: "Growth leadership", zh: "增长与品牌领导力" },
     goal: {

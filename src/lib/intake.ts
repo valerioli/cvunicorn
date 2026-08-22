@@ -250,7 +250,7 @@ export type Entry = {
 
 export type Essentials = {
   fullName: string;
-  headline: string; // "CMO at AInfinity"
+  headline: string; // "General Manager at AInfinity"
   profession: string; // slug or free text
   email: string;
   bio: string;
