@@ -244,7 +244,7 @@ body::before {
 /* Scroll-driven reveal (progressive enhancement; content visible without JS) */
 @media (prefers-reduced-motion: no-preference) {
   .reveal {
-    opacity: 0;
+    opacity: 1;
     transform: translateY(22px);
     transition:
       opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
@@ -333,9 +333,7 @@ select {
   box-shadow: 0 0 0 3px var(--color-periwinkle-wash);
 }
 
-.text-white {
-  color: var(--color-midnight-ink);
-}
+
 
 .btn-primary,
 .btn-primary *,
@@ -363,3 +361,8 @@ select {
 .decoration-iris-300\/40 {
   text-decoration-color: var(--color-indigo-ink);
 }
+
+/* Form controls remain usable on touch screens and with a keyboard. */
+button, .btn-primary, .btn-ghost { min-height: 44px; }
+:where(a, button, input, textarea, select, [role="button"]):focus-visible { outline: 2px solid var(--color-indigo-ink); outline-offset: 3px; }
+.field::placeholder { color: var(--color-slate); }

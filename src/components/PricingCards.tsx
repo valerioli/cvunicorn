@@ -32,16 +32,16 @@ const copy = {
     features: {
       en: [
         "Website live for 12 months",
-        "Custom domain included (yourname.com)",
+        "Custom domain included (assisted setup)",
         "Unlimited content updates & regeneration",
-        "Priority generation queue",
+        "Review before publishing",
         "SEO-optimized so you rank for your name",
       ],
       zh: [
         "网站上线 12 个月",
-        "包含自定义域名（yourname.com）",
+        "包含自定义域名（客服协助设置）",
         "不限次数更新内容与重新生成",
-        "优先生成队列",
+        "检查预览后再发布",
         "SEO 优化，更容易搜索到你的名字",
       ],
     },
@@ -96,7 +96,7 @@ export default function PricingCards() {
             ))}
           </ul>
           <Link
-            href={`/checkout?plan=${plan.id}`}
+            href={`/start?plan=${plan.id}`}
             className={`${plan.highlight ? "btn-primary" : "btn-ghost"} mt-7 w-full px-5 py-3 text-sm`}
           >
             {copy[plan.id].cta[language]}

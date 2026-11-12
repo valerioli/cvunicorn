@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { UploadedFile } from "@/lib/intake";
+import { useLanguage } from "@/components/i18n";
 
 export function Label({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
@@ -21,9 +22,10 @@ export function TextField(props: {
   required?: boolean;
   hint?: string;
 }) {
+  const { language } = useLanguage();
   return (
     <label className="block">
-      <Label hint={props.hint ?? (props.required ? undefined : "optional")}>
+      <Label hint={props.hint ?? (props.required ? undefined : language === "zh" ? "选填" : "optional")}>
         {props.label}
       </Label>
       <input
@@ -46,9 +48,10 @@ export function TextArea(props: {
   rows?: number;
   hint?: string;
 }) {
+  const { language } = useLanguage();
   return (
     <label className="block">
-      <Label hint={props.hint ?? "optional"}>{props.label}</Label>
+      <Label hint={props.hint ?? (language === "zh" ? "选填" : "optional")}>{props.label}</Label>
       <textarea
         className="field resize-y"
         rows={props.rows ?? 4}
@@ -76,25 +79,26 @@ export function FileDrop(props: {
   files: UploadedFile[];
   onChange: (files: UploadedFile[]) => void;
 }) {
+  const { language } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   async function handleFiles(list: FileList | null) {
-    if (!list || list.length === 0) return;
+    if (busy || !list || list.length === 0) return;
     setBusy(true);
     setError(null);
     try {
       const uploaded: UploadedFile[] = [];
-      for (const f of Array.from(list)) {
-        if (f.size > 8 * 1024 * 1024) {
-          setError(`"${f.name}" is over 8MB — please use a smaller file.`);
+      for (const f of Array.from(list).slice(0, props.multiple ? undefined : 1)) {
+        if (f.size > 4 * 1024 * 1024) {
+          setError(`"${f.name}" is over 4MB — please use a smaller file.`);
           continue;
         }
         uploaded.push(await uploadFile(f));
       }
-      props.onChange(
+      if (uploaded.length) props.onChange(
         props.multiple ? [...props.files, ...uploaded] : uploaded.slice(0, 1),
       );
     } catch {
@@ -112,8 +116,10 @@ export function FileDrop(props: {
         role="button"
         tabIndex={0}
         aria-label={`Upload ${props.label}`}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+        aria-disabled={busy}
+        aria-busy={busy}
+        onClick={() => !busy && inputRef.current?.click()}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !busy) { e.preventDefault(); inputRef.current?.click(); } }}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -135,7 +141,7 @@ export function FileDrop(props: {
           <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
         </svg>
         <p className="text-sm text-[#061b31]">
-          {busy ? "Uploading…" : "Drop files here or click to browse"}
+          {busy ? (language === "zh" ? "正在上传…" : "Uploading…") : (language === "zh" ? "拖入文件或点击选择" : "Drop files here or click to browse")}
         </p>
         {props.accept && (
           <p className="text-xs text-[#64748d]">{props.accept.replaceAll(",", " · ")}</p>
@@ -149,7 +155,7 @@ export function FileDrop(props: {
         multiple={props.multiple}
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {error && <p className="mt-2 text-xs text-[#533afd]">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-xs text-[#533afd]">{error}</p>}
       {props.files.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2">
           {props.files.map((f) => (
@@ -160,7 +166,7 @@ export function FileDrop(props: {
               <span className="max-w-40 truncate">{f.name}</span>
               {typeof f.extractedCharCount === "number" && f.extractedCharCount > 0 && (
                 <span className="rounded-[3px] bg-white px-1.5 py-0.5 text-[#1f7a4d]">
-                  text extracted
+                  {language === "zh" ? "已提取文字" : "text extracted"}
                 </span>
               )}
               <button

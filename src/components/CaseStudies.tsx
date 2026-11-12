@@ -33,8 +33,8 @@ export default function CaseStudies() {
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[#50617a]">
               {language === "zh"
-                ? "默认展示 4 个不同风格的真实内嵌案例，也可以选择某一种风格，观察同一批内容如何被重新设计。"
-                : "By default, the four embedded case sites use different styles. Pick one style to see the same content system redesigned across the set."}
+                ? "Valerio 为真实个人网站；其余为示例人物的设计演示。选择风格可切换演示，Valerio 原站保持不变。"
+                : "Valerio is a live personal portfolio. The other profiles are illustrative design demos. Style changes apply to the demos; Valerio’s original site stays unchanged."}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -70,7 +70,7 @@ export default function CaseStudies() {
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 md:grid-cols-2">
         {caseStudySites.map((study) => {
           const isValerio = study.slug === "valerio-li";
           const activeStyleId = styleChoice === "auto" || isValerio ? study.style : styleChoice;
@@ -91,9 +91,11 @@ export default function CaseStudies() {
             >
               <div className="relative h-80 overflow-hidden border-b border-[#e5edf5] bg-[#f8fafd]">
                 <iframe
-                  title={`${study.name} generated website preview`}
+                  title={`${study.name} website preview`}
+                  tabIndex={-1}
+                  sandbox="allow-scripts"
                   src={previewUrl}
-                  className="h-[640px] w-[200%] origin-top-left scale-50 border-0 bg-white"
+                  className="pointer-events-none h-[640px] w-[200%] origin-top-left scale-50 border-0 bg-white"
                   loading="lazy"
                 />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
@@ -129,12 +131,6 @@ export default function CaseStudies() {
                   <p className="mt-1 font-display text-xl font-light text-[#061b31]">
                     {study.metric[language]}
                   </p>
-                  <div className="metric-line mt-3 h-1.5 rounded-full bg-[#e5edf5]">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: "72%", backgroundColor: study.accent }}
-                    />
-                  </div>
                 </div>
 
                 <p className="mt-4 flex-1 text-sm leading-relaxed text-[#50617a]">
@@ -157,7 +153,7 @@ export default function CaseStudies() {
                   target="_blank"
                   className="mt-5 inline-flex w-full items-center justify-center rounded-[4px] border border-[#061b31] bg-white px-4 py-2.5 text-sm font-normal text-[#061b31] shadow-[0_10px_28px_rgba(6,27,49,0.12)] transition hover:-translate-y-0.5 hover:bg-[#061b31] hover:text-white"
                 >
-                  {language === "zh" ? "查看生成网站" : "View generated site"}
+                  {language === "zh" ? (isValerio ? "查看真实网站" : "打开风格演示") : (isValerio ? "View live portfolio" : "Open design demo")}
                 </Link>
               </div>
             </article>

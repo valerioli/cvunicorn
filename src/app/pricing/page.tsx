@@ -56,7 +56,7 @@ export default function PricingPage() {
         ]}
       />
       <section className="border-b border-[#e5edf5] bg-white px-5 pb-16 pt-10 sm:pt-16">
-        <SectionHeading
+        <SectionHeading as="h1"
           eyebrow={<T en="Pricing" zh="价格" />}
           title={<T en="Two prices. Zero fine print." zh="两个价格，没有隐藏条款。" />}
           sub={<T en="Try the real thing for less than a dollar. Keep it for a year for less than lunch." zh="不到 1 美元先试真实网站；全年上线价格比一顿午餐还低。" />}

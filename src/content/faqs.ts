@@ -9,7 +9,7 @@ export const generalFaqs: Faq[] = [
   },
   {
     q: "How much does CVUnicorn cost?",
-    a: "CVUnicorn has two simple options: a Preview Pass for $0.99 that keeps your website live for 3 days, and Unicorn Year for $9.99 that keeps your website live for a full year and includes a custom domain. There are no hidden fees and no forced subscription.",
+    a: "CVUnicorn has two simple options: a Preview Pass for $0.99 that keeps your website live for 3 days, and Unicorn Year for $9.99 that keeps your website live for a full year and includes a custom domain with assisted setup. There are no hidden fees and no forced subscription.",
   },
   {
     q: "How long does it take to build my website?",
@@ -25,15 +25,15 @@ export const generalFaqs: Faq[] = [
   },
   {
     q: "Can I use my own domain name?",
-    a: "Yes. The Unicorn Year plan ($9.99/year) includes a custom domain so your site lives at your own address, like yourname.com.",
+    a: "Yes. The Unicorn Year plan ($9.99/year) includes a custom domain with assisted setup. Contact support to arrange availability and setup.",
   },
   {
     q: "What happens after my plan expires?",
-    a: "Your content is kept safe. If your Preview Pass or Unicorn Year expires, your site goes offline but nothing is deleted — you can renew at any time and your website comes back exactly as it was.",
+    a: "Your site is retained for up to 400 days after its last update. If your Preview Pass or Unicorn Year expires, your site goes offline but nothing is deleted — you can renew from your dashboard while your stored site is retained (up to 400 days after its last update).",
   },
   {
     q: "Will more content really make my website better?",
-    a: "Yes. CVUnicorn adapts the structure of your site to the material you provide. A CV alone produces a clean one-page site; adding projects, photos, writing, press, and talks unlocks dedicated sections, galleries, and a multi-page layout — similar to a professionally commissioned personal site.",
+    a: "Yes. CVUnicorn adapts the structure of your site to the material you provide. A CV alone produces a clean one-page site; adding projects, photos, writing, press, and talks unlocks dedicated sections, galleries, and a multi-section layout — similar to a professionally commissioned personal site.",
   },
   {
     q: "Who is CVUnicorn for?",
@@ -41,6 +41,6 @@ export const generalFaqs: Faq[] = [
   },
   {
     q: "Is my data private?",
-    a: "Your uploads are used only to build your website. You choose what appears publicly, and you can take your site offline or delete your data at any time.",
+    a: "Your uploads are used only to build your website. Review your generated site before publishing. Uploaded assets use shareable URLs, so do not upload confidential documents. Contact support to request removal of your site and data.",
   },
 ];

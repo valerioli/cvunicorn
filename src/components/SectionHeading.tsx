@@ -3,11 +3,13 @@ export default function SectionHeading({
   title,
   sub,
   center = false,
+  as: Heading = "h2",
 }: {
   eyebrow?: React.ReactNode;
   title: React.ReactNode;
   sub?: React.ReactNode;
   center?: boolean;
+  as?: "h1" | "h2";
 }) {
   return (
     <div className={`reveal max-w-3xl ${center ? "mx-auto text-center" : ""}`}>
@@ -16,9 +18,9 @@ export default function SectionHeading({
           {eyebrow}
         </p>
       )}
-      <h2 className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31] sm:text-4xl md:text-5xl md:leading-[1.03]">
+      <Heading className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31] sm:text-4xl md:text-5xl md:leading-[1.03]">
         {title}
-      </h2>
+      </Heading>
       {sub && <p className="mt-5 max-w-2xl text-base font-light leading-relaxed text-[#50617a] sm:text-xl">{sub}</p>}
     </div>
   );

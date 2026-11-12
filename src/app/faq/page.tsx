@@ -27,7 +27,7 @@ export default function FaqPage() {
         ]}
       />
       <section className="border-b border-[#e5edf5] bg-white px-5 pb-4 pt-10 sm:pt-16">
-        <SectionHeading
+        <SectionHeading as="h1"
           eyebrow={<T en="FAQ" zh="常见问题" />}
           title={<T en="Everything, answered plainly" zh="把所有问题说清楚" />}
           sub={<T en="If it's not here, email us — a human reads every message." zh="如果这里没有回答，欢迎邮件联系我们，每封消息都会有人认真看。" />}

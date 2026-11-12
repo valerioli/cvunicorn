@@ -39,9 +39,9 @@ export const plans: Plan[] = [
     tagline: "Your career's home for a full year.",
     features: [
       "Website live for 12 months",
-      "Custom domain included (yourname.com)",
+      "Custom domain included (assisted setup)",
       "Unlimited content updates & regeneration",
-      "Priority generation queue",
+      "Review your website before publishing",
       "SEO-optimized so you rank for your name",
     ],
     cta: "Claim my year",

@@ -14,14 +14,16 @@ export default function SiteMockup() {
             mayachen.cvunicorn.com
           </span>
         </div>
-        <div className="relative h-[500px] overflow-hidden bg-[#171721] sm:h-[560px]">
+        <div className="relative h-[500px] overflow-hidden bg-[#f8fafd] sm:h-[560px]">
           <iframe
-            title="Maya Chen generated website preview"
+            title="Illustrative Maya Chen design preview"
             src="/case-study-sites/maya-chen?lang=en&embed=1&style=mercury"
-            className="pointer-events-none h-[1120px] w-[200%] origin-top-left scale-50 border-0 bg-[#171721]"
-            loading="lazy"
+            className="pointer-events-none h-[1120px] w-[200%] origin-top-left scale-50 border-0 bg-[#f8fafd]"
+            loading="eager"
+            tabIndex={-1}
+            sandbox="allow-scripts"
           />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#171721] to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f8fafd] to-transparent" />
         </div>
       </div>
       <div className="motion-drift card absolute -bottom-8 -left-4 hidden w-56 p-4 shadow-[0_20px_60px_rgba(6,27,49,0.1)] sm:block">

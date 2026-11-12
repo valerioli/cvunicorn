@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createOrder, saveOrder } from "@/lib/orders";
+import { createOrder, saveOrder, getOrder } from "@/lib/orders";
 import { getPaymentProvider } from "@/lib/payments";
-import { createAccessToken } from "@/lib/access";
+import { createAccessToken, verifyAccessToken } from "@/lib/access";
+import { kvGet, kvSet } from "@/lib/storage";
+import { isIntake } from "@/lib/intakeValidation";
 import { getPlan } from "@/content/plans";
 
 export const runtime = "nodejs";
@@ -12,13 +14,15 @@ export async function POST(req: NextRequest) {
     planId?: string;
     draftId?: string;
     email?: string;
+    orderId?: string;
+    token?: string;
   } | null;
 
   const plan = body?.planId ? getPlan(body.planId) : undefined;
   if (!plan) {
     return NextResponse.json({ error: "Please choose a valid plan." }, { status: 400 });
   }
-  const email = (body?.email ?? "").trim();
+  const email = typeof body?.email === "string" ? body.email.trim() : "";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { error: "A valid email is required for your receipt and site access." },
@@ -27,10 +31,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    let previous = null;
+    if (body?.orderId) {
+      if (typeof body.token !== "string" || verifyAccessToken(body.token)?.orderId !== body.orderId) return NextResponse.json({ error: "Invalid renewal link" }, { status: 403 });
+      previous = await getOrder(body.orderId);
+      if (!previous || previous.status !== "paid" || previous.email !== email.toLowerCase()) return NextResponse.json({ error: "Use the email address from your original purchase." }, { status: 400 });
+    }
+    const draftId = previous?.draftId ?? body?.draftId ?? "";
+    const draft = await kvGet(`draft:${draftId}`);
+    if (!previous && (!isIntake(draft) || !draft.essentials.fullName.trim() || !draft.essentials.headline.trim())) return NextResponse.json({ error: "Add your content at /start before choosing a pass." }, { status: 400 });
+    if (isIntake(draft)) await kvSet(`draft:${draftId}`, draft, 60 * 60 * 24 * 400);
     const order = await createOrder({
       planId: plan.id,
-      draftId: body?.draftId ?? "",
+      draftId,
       email,
+      renewalOf: previous?.id,
     });
     const token = createAccessToken(order.id);
     const provider = getPaymentProvider();

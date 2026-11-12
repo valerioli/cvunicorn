@@ -19,7 +19,7 @@ With no env vars at all you can still run the full product loop locally: build a
 ```bash
 git init && git add -A && git commit -m "CVUnicorn v1"
 git remote add origin https://github.com/valerioli/cvunicorn.git
-git push -u origin main --force   # replaces the old prototype
+git push -u origin main
 ```
 
 Then on [vercel.com](https://vercel.com): **Add New → Project → import `valerioli/cvunicorn`** (defaults are correct for Next.js) and add the environment variables from `.env.example`:
@@ -106,5 +106,11 @@ Per-page metadata + canonicals, Schema.org JSON-LD (Organization, WebSite, Produ
 - **Stripe receipts/email**: Stripe can send payment receipts, but CVUnicorn still needs app-level email delivery for dashboard magic links.
 - **Infini**: optional crypto provider; verify payload details against a real sandbox event before using it in production.
 - **Custom domains** for Unicorn Year are a manual fulfillment step for now.
-- **CV file text extraction** — the generator uses pasted bio/CV text today; parse uploaded PDF/DOCX server-side when ready.
+- **CV file text extraction** is implemented for supported documents; users can review and correct extracted text before generation.
 - `/account` lookup without a link requires emailing support; add magic-link email auth when email delivery exists.
+
+## Audit and regression checks
+
+See [the November 2026 audit](docs/audits/2026-11-12.md) for repairs, verification and remaining limitations. Generation creates a private preview; publishing is a separate authenticated action. Regeneration preserves the live version until publication. Paid content editing and renewal retain the original site.
+
+Run `npm run check`, `npm test` and `npm run build`. For browser checks start the production server on port 3123, then run `npm run test:browser` (set `CHROME_PATH` if needed). Production requires persistent storage, upload storage, a signing secret and a real payment provider.

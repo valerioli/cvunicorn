@@ -25,7 +25,9 @@ async function redis(command: (string | number)[]): Promise<{ result: unknown }>
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Storage error: ${res.status}`);
-  return (await res.json()) as { result: unknown };
+  const payload = await res.json() as { result: unknown; error?: string };
+  if (payload.error) throw new Error("Storage command failed");
+  return payload;
 }
 
 export async function kvSet(
@@ -67,6 +69,21 @@ export async function kvDelete(key: string): Promise<void> {
     return;
   }
   memory.delete(key);
+}
+
+/** Short leases prevent duplicate model calls across server instances. */
+export async function acquireLease(key: string, owner: string, seconds: number): Promise<boolean> {
+  if (hasRedis) return (await redis(["SET", key, owner, "NX", "EX", seconds])).result === "OK";
+  const hit = memory.get(key);
+  if (hit && (!hit.expiresAt || hit.expiresAt > Date.now())) return false;
+  memory.set(key, { value: owner, expiresAt: Date.now() + seconds * 1000 });
+  return true;
+}
+
+export async function releaseLease(key: string, owner: string): Promise<void> {
+  if (hasRedis) {
+    await redis(["EVAL", "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, owner]);
+  } else if (memory.get(key)?.value === owner) memory.delete(key);
 }
 
 /** Binary storage for the dev-mode upload fallback. */

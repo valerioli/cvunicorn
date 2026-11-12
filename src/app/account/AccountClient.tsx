@@ -15,6 +15,10 @@ type StatusPayload = {
   accessExpiresAt: number | null;
   activeAccess: boolean;
   siteSlug: string | null;
+  siteUrl: string | null;
+  needsPublish: boolean;
+  published: boolean;
+  draftId: string;
 };
 
 export default function AccountClient() {
@@ -26,6 +30,17 @@ export default function AccountClient() {
   const [generating, setGenerating] = useState(false);
   const [siteUrl, setSiteUrl] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState(0);
+  const [savedAccess, setSavedAccess] = useState<string | null>(null);
+  const editHref = `/start?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`;
+  const previewHref = `/api/site-preview?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}&v=${previewVersion}`;
+
+  useEffect(() => {
+    try { const value = localStorage.getItem("cvunicorn.account"); if (value?.startsWith("/account?order=") && !value.includes("\\")) setSavedAccess(value); } catch {}
+  }, []);
 
   useEffect(() => {
     if (!orderId || !token) return;
@@ -34,12 +49,15 @@ export default function AccountClient() {
         if (!r.ok) throw new Error();
         setData((await r.json()) as StatusPayload);
       })
-      .catch(() => setError("We couldn't verify this link. Use the link from your receipt email."));
+      .catch(() => setError("We couldn't verify this link. Use the link from your payment confirmation page."));
   }, [orderId, token]);
 
   useEffect(() => {
-    if (data?.siteSlug) setSiteUrl(publicSiteUrl(data.siteSlug));
-  }, [data]);
+    if (data) {
+      setSiteUrl(data.siteUrl); setPreview(data.needsPublish); setPublished(data.published);
+      try { localStorage.setItem("cvunicorn.account", `/account?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`); } catch {}
+    }
+  }, [data, orderId, token]);
 
   async function generate() {
     setGenerating(true);
@@ -55,6 +73,8 @@ export default function AccountClient() {
         setGenError(json.error ?? "Generation failed — please try again.");
       } else {
         setSiteUrl(json.siteUrl);
+        setPreview(true);
+        setPreviewVersion(v => v + 1);
       }
     } catch {
       setGenError("Network error — please try again.");
@@ -63,18 +83,30 @@ export default function AccountClient() {
     }
   }
 
+  async function publish() {
+    setPublishing(true); setGenError(null);
+    try {
+      const res = await fetch("/api/site-preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId, token }) });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Publishing failed. Please try again.");
+      setSiteUrl(json.siteUrl); setPreview(false); setPublished(true);
+    } catch (e) { setGenError(e instanceof Error ? e.message : "Publishing failed"); }
+    finally { setPublishing(false); }
+  }
+
   if (!orderId || !token) {
     return (
       <Shell>
         <h1 className="font-display text-3xl font-light tracking-[-0.02em] text-[#061b31]">My site</h1>
+        {savedAccess && <Link href={savedAccess} className="btn-primary mt-5 inline-flex self-start px-6 py-3 text-sm">Open my saved dashboard</Link>}
         <p className="mt-3 max-w-md text-sm leading-relaxed text-[#50617a]">
           Open this page using the personal link from your payment
-          confirmation or receipt email — it's your key, no password needed.
+          confirmation page — it's your key, no password needed.
         </p>
         <p className="mt-4 text-sm text-[#64748d]">
           Can't find it? Email{" "}
-          <a href={SUPPORT_MAILTO} className="text-[#533afd] hover:underline">{SUPPORT_EMAIL}</a>{" "}
-          from your purchase address and we'll resend it.
+          <a href={SUPPORT_MAILTO} className="text-[#533afd] underline underline-offset-4">{SUPPORT_EMAIL}</a>{" "}
+          from your purchase address for help restoring access.
         </p>
         <Link href="/start" className="btn-primary mt-8 inline-flex px-6 py-3 text-sm">
           Or build a new website
@@ -141,12 +173,12 @@ export default function AccountClient() {
             </Link>
           )}
           {!data.activeAccess && data.status === "paid" && (
-            <Link href="/checkout?plan=year" className="btn-primary px-4 py-2 text-xs">
+            <Link href={`/checkout?plan=year&order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`} className="btn-primary px-4 py-2 text-xs">
               Renew for a year — $9.99
             </Link>
           )}
           {data.activeAccess && data.planId === "preview" && (
-            <Link href="/checkout?plan=year" className="btn-primary px-4 py-2 text-xs">
+            <Link href={`/checkout?plan=year&order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`} className="btn-primary px-4 py-2 text-xs">
               Upgrade to a full year — $9.99
             </Link>
           )}
@@ -159,19 +191,19 @@ export default function AccountClient() {
           <h2 className="text-sm font-normal text-[#061b31]">Your website</h2>
           {siteUrl ? (
             <>
-              <a
+              {published && <a
                 href={siteUrl}
                 target="_blank"
                 rel="noopener"
                 className="mt-3 block truncate rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-sm font-normal text-[#533afd] hover:bg-[#e8e9ff]"
               >
                 {siteUrl} ↗
-              </a>
+              </a>}
               <div className="mt-4 flex flex-wrap gap-2.5">
                 <button type="button" onClick={generate} disabled={generating} className="btn-ghost px-4 py-2 text-xs disabled:opacity-50">
                   {generating ? "Regenerating…" : "Regenerate with my latest content"}
                 </button>
-                <Link href="/start" className="btn-ghost px-4 py-2 text-xs">
+                <Link href={editHref} className="btn-ghost px-4 py-2 text-xs">
                   Edit my content
                 </Link>
               </div>
@@ -190,8 +222,19 @@ export default function AccountClient() {
               >
                 {generating ? "Designing your website… (~2–4 min)" : "Generate my website"}
               </button>
+              <Link href={editHref} className="btn-ghost mt-3 inline-flex px-4 py-2 text-xs">Review my content first</Link>
             </>
           )}
+          {generating && <p role="status" className="mt-4 text-sm text-[#50617a]">Designing your preview. This can take a few minutes. Your published site stays unchanged.</p>}
+          {preview && <div className="mt-6">
+            <h3 className="text-lg text-[#061b31]">Review before publishing</h3>
+            <p className="mt-2 text-sm text-[#50617a]">Check your text, photos and links. Edit your content or regenerate if something needs changing.</p>
+            <iframe key={previewVersion} title="Your private website preview" src={previewHref} sandbox="allow-scripts allow-popups" referrerPolicy="no-referrer" className="mt-4 h-[560px] w-full rounded border border-[#e5edf5]" />
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a href={previewHref} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-3 text-sm">Open full preview</a>
+              <button type="button" disabled={publishing || generating} onClick={publish} className="btn-primary px-5 py-3 text-sm">{publishing ? "Publishing…" : published ? "Publish this update" : "Publish my website"}</button>
+            </div>
+          </div>}
           {genError && (
             <p role="alert" className="mt-3 rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd] px-4 py-3 text-xs text-[#533afd]">
               {genError}
@@ -201,27 +244,6 @@ export default function AccountClient() {
       )}
     </Shell>
   );
-}
-
-function publicSiteUrl(slug: string): string {
-  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (configuredUrl) {
-    try {
-      const url = new URL(configuredUrl);
-      if (url.hostname !== "localhost" && url.hostname !== "127.0.0.1") {
-        return `${url.protocol}//${slug}.${url.hostname}`;
-      }
-    } catch {}
-  }
-
-  if (typeof window === "undefined") return `/site/${slug}`;
-  const { protocol, hostname, origin } = window.location;
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return `${origin}/site/${slug}`;
-  }
-  const parts = hostname.split(".");
-  const rootHost = parts.length > 2 ? parts.slice(-2).join(".") : hostname;
-  return `${protocol}//${slug}.${rootHost}`;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {

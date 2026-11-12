@@ -13,9 +13,7 @@ export function getPaymentProvider(): PaymentProvider {
       return infiniProvider;
     case "dev":
       if (process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production") {
-        console.warn(
-          "[payments] WARNING: dev payment provider active in production. Set PAYMENT_PROVIDER=stripe.",
-        );
+        throw new Error("Simulated payments are disabled in production");
       }
       return devProvider;
     default:

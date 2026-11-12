@@ -12,6 +12,7 @@ type StatusPayload = {
   receiptNumber: string | null;
   accessExpiresAt: number | null;
   failureReason: string | null;
+  accountUrl?: string | null;
 };
 
 export default function SuccessClient() {
@@ -63,7 +64,7 @@ export default function SuccessClient() {
 
   if (state?.status === "paid") {
     const receiptHref = `/receipt/${orderId}?t=${encodeURIComponent(token)}`;
-    const accountHref = `/account?order=${orderId}&t=${encodeURIComponent(token)}`;
+    const accountHref = state.accountUrl || `/account?order=${orderId}&t=${encodeURIComponent(token)}`;
     return (
       <Shell>
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[4px] border border-[#d6d9fc] bg-[#f8fafd]">
@@ -74,8 +75,8 @@ export default function SuccessClient() {
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-[#50617a]">
           {state.planId === "year"
-            ? "Your website is covered for the next 12 months, custom domain included."
-            : "Your 3-day preview is live. Enjoy the spotlight."}
+            ? "Your website is covered for the next 12 months, with support for connecting your own domain."
+            : "Your 3-day pass is ready. Generate and review your site in your dashboard."}
         </p>
         <dl className="card mx-auto mt-7 max-w-sm space-y-2.5 p-5 text-left text-sm">
           <div className="flex justify-between">
@@ -105,7 +106,7 @@ export default function SuccessClient() {
         </div>
         <p className="mt-5 text-xs text-[#64748d]">
           Save this page's link — it's your key to your dashboard and receipt.
-          We've also emailed it to you.
+          Bookmark it so you can return to your site.
         </p>
       </Shell>
     );
@@ -129,7 +130,7 @@ export default function SuccessClient() {
         <h1 className="font-display text-2xl font-light text-[#061b31]">Still confirming…</h1>
         <p className="mt-3 text-sm leading-relaxed text-[#50617a]">
           Your payment is taking longer than usual to confirm. This page is
-          safe to close — we'll email you the moment it clears. If you were
+          safe to bookmark and revisit. If you were
           charged and don't hear from us within an hour, contact
           {` ${SUPPORT_EMAIL} `}with order <code className="rounded bg-white/8 px-1.5 py-0.5 text-xs">{orderId}</code>.
         </p>

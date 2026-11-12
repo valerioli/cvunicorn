@@ -2,6 +2,7 @@ export type SiteRecord = {
   slug: string;
   orderId: string;
   html: string;
+  previewHtml?: string;
   generatedAt: number;
 };
 
@@ -11,10 +12,10 @@ export function siteUrlForSlug(slug: string): string {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cvunicorn.com";
   try {
     const url = new URL(baseUrl);
-    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+    if (!["cvunicorn.com", "www.cvunicorn.com"].includes(url.hostname)) {
       return `${url.origin}/site/${slug}`;
     }
-    return `${url.protocol}//${slug}.${url.hostname}`;
+    return `${url.protocol}//${slug}.cvunicorn.com`;
   } catch {
     return `/site/${slug}`;
   }

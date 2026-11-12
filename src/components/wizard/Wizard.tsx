@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { isIntake } from "@/lib/intakeValidation";
+import { localizeModule } from "@/lib/moduleLabels";
 import {
   emptyIntake,
   getModule,
@@ -30,36 +32,72 @@ function newEntry(): Entry {
 
 export default function Wizard() {
   const router = useRouter();
+  const params = useSearchParams();
+  const orderId = params.get("order") ?? "";
+  const token = params.get("t") ?? "";
+  const editing = Boolean(orderId && token);
   const { language } = useLanguage();
   const [data, setData] = useState<IntakeData>(emptyIntake);
   const [hydrated, setHydrated] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
   // step index: 0 = essentials, 1 = style, 2 = module picker, 3..N = selected modules, N+1 = review
   const [step, setStep] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ——— restore draft ——— */
   useEffect(() => {
+    if (editing) {
+      const controller = new AbortController();
+      fetch(`/api/editor?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`, { signal: controller.signal, cache: "no-store" })
+        .then(async r => { const json = await r.json(); if (!r.ok || !isIntake(json)) throw new Error(json.error || "Unable to load your draft"); setData(json); setHydrated(true); })
+        .catch(e => { if (!controller.signal.aborted) setLoadError(e.message); });
+      return () => controller.abort();
+    }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setData(JSON.parse(raw) as IntakeData);
+      if (raw && isIntake(JSON.parse(raw))) setData(JSON.parse(raw) as IntakeData);
     } catch {}
     setHydrated(true);
-  }, []);
+  }, [editing, orderId, token]);
+
+  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current); }, []);
+
+  const save = useCallback((d: IntakeData) => {
+    const task = saveQueue.current.catch(() => {}).then(async () => {
+      const res = await fetch(editing ? "/api/editor" : "/api/intake", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editing ? { orderId, token, draft: d } : d),
+      });
+      if (!res.ok) throw new Error("Your draft could not be saved. Check your connection and try again.");
+      setSaveError(null);
+    });
+    saveQueue.current = task;
+    return task;
+  }, [editing, orderId, token]);
 
   /* ——— autosave (local + server, debounced) ——— */
   const persist = useCallback((d: IntakeData) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+      localStorage.setItem(editing ? `${STORAGE_KEY}.${orderId}` : STORAGE_KEY, JSON.stringify(d));
     } catch {}
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      fetch("/api/intake", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(d),
-      }).catch(() => {});
+      save(d).catch(e => setSaveError(e.message));
     }, 900);
-  }, []);
+  }, [editing, orderId, save]);
+
+  async function finish() {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    setSaving(true);
+    try {
+      await save(data);
+      router.push(editing ? `/account?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}` : `/checkout?plan=${params.get("plan") === "year" ? "year" : "preview"}&draft=${encodeURIComponent(data.draftId)}`);
+    } catch (e) { setSaveError(e instanceof Error ? e.message : "Unable to save"); }
+    finally { setSaving(false); }
+  }
 
   const update = useCallback(
     (fn: (d: IntakeData) => IntakeData) => {
@@ -90,7 +128,7 @@ export default function Wizard() {
     if (step === 1) return language === "zh" ? "选择风格" : "Choose a style";
     if (step === 2) return language === "zh" ? "选择故事模块" : "Choose your story modules";
     const m = moduleForStep(step);
-    if (m) return getModule(m).title;
+    if (m) return localizeModule(getModule(m), language).title;
     return language === "zh" ? "确认并生成" : "Review & generate";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, data.selected, language]);
@@ -105,6 +143,7 @@ export default function Wizard() {
         }[scoreLabel] ?? scoreLabel
       : scoreLabel;
 
+  if (loadError) return <p role="alert" className="mx-auto max-w-2xl px-5 py-10">{loadError}</p>;
   if (!hydrated) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center text-ink-400">
@@ -115,8 +154,9 @@ export default function Wizard() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 pb-24">
+      {saveError && <p role="alert" className="my-4 text-sm text-red-700">{saveError}</p>}
       {/* ——— progress + richness ——— */}
-      <div className="sticky top-16 z-30 -mx-5 mb-8 border-b border-[#e5edf5] bg-white px-5 py-4 md:top-20">
+      <div className="sticky top-20 z-30 -mx-5 mb-8 border-b border-[#e5edf5] bg-white px-5 py-4 md:top-24">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-xs font-normal uppercase tracking-[0.08em] text-[#64748d]">
@@ -236,6 +276,19 @@ export default function Wizard() {
             </p>
           )}
           <div className="mt-5">
+            {data.essentials.cv && <TextArea
+              label={language === "zh" ? "核对简历提取结果" : "Review extracted CV text"}
+              hint={language === "zh" ? "修正顺序、日期或缺失信息；这份文字会用于生成" : "Correct reading order, dates or missing details before generating"}
+              rows={8} value={data.essentials.cvText ?? ""}
+              onChange={v => update(d => ({ ...d, essentials: { ...d.essentials, cvText: v } }))}
+            />}
+            <label className="my-5 block text-sm">
+              {language === "zh" ? "生成网站的语言" : "Website language"}
+              <select className="field mt-2" value={data.siteLanguage ?? "auto"} onChange={e => update(d => ({ ...d, siteLanguage: e.target.value as IntakeData["siteLanguage"] }))}>
+                <option value="auto">{language === "zh" ? "跟随材料语言" : "Match my content"}</option>
+                <option value="en">English</option><option value="zh">简体中文</option>
+              </select>
+            </label>
             <TextArea
               label={language === "zh" ? "简短介绍" : "Short bio or introduction"}
               hint={language === "zh" ? "也可以直接粘贴简历文字" : "or paste your CV text here"}
@@ -308,7 +361,8 @@ export default function Wizard() {
             </span>
           </p>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {modules.map((m) => {
+            {modules.map((raw) => {
+              const m = localizeModule(raw, language);
               const on = data.selected.includes(m.id);
               return (
                 <button
@@ -404,7 +458,7 @@ export default function Wizard() {
                 <ReviewRow
                   key={id}
                   ok={n > 0}
-                  label={`${getModule(id).title} — ${n} ${n === 1 ? getModule(id).entryNoun : getModule(id).entryNoun + "s"}`}
+                  label={`${localizeModule(getModule(id), language).title} — ${n}`}
                 />
               );
             })}
@@ -412,20 +466,20 @@ export default function Wizard() {
 
           <div className="card mt-8 bg-[#f8fafd] p-6">
             <p className="text-sm text-[#50617a]">
-              {language === "zh" ? "下一步：我们会生成你的网站，并展示完整预览。" : "Next: we generate your website and show you a full preview."}
+              {editing ? (language === "zh" ? "保存后返回控制台，用新材料重新生成预览。" : "Save and return to your dashboard to generate an updated preview.") : (language === "zh" ? "下一步：选择方案并付款，然后生成网站预览，确认后发布。" : "Next: choose and pay for a pass, then generate a preview and publish when ready.")}
               <br className="hidden sm:block" />
-              {language === "zh" ? "只有当你准备上线时才需要付费，价格从 " : "You only pay when you're ready to put it live — from "}
-              <span className="font-normal text-[#061b31]">$0.99</span>.
+              {!editing && <>{language === "zh" ? "方案价格从 " : "Passes start at "}<span className="font-normal text-[#061b31]">$0.99</span>.</>}
             </p>
             <button
               type="button"
-              onClick={() => router.push("/checkout?plan=preview&draft=" + data.draftId)}
+              onClick={finish}
+              disabled={saving}
               className="btn-primary mt-5 px-8 py-3.5 text-base"
             >
-              {language === "zh" ? "生成我的网站" : "Generate my website"}
+              {saving ? (language === "zh" ? "正在保存…" : "Saving…") : editing ? (language === "zh" ? "保存并返回我的网站" : "Save and return to my site") : (language === "zh" ? "保存并选择方案" : "Save and choose a pass")}
             </button>
             <p className="mt-3 text-xs text-[#64748d]">
-              {language === "zh" ? "约 4 分钟 · 预览后再选择付费计划" : "Takes ~4 minutes · You'll choose your plan after previewing"}
+              {language === "zh" ? "生成通常需要几分钟；发布前可以检查完整网站。" : "Generation takes a few minutes. Review the full site before publishing."}
             </p>
           </div>
         </section>
@@ -494,7 +548,8 @@ function ModuleStep({
   entries: Entry[];
   onChange: (entries: Entry[]) => void;
 }) {
-  const def = getModule(moduleId);
+  const { language } = useLanguage();
+  const def = localizeModule(getModule(moduleId), language);
   const list = entries.length > 0 ? entries : [newEntry()];
 
   // ensure at least one entry exists in state
@@ -565,7 +620,7 @@ function ModuleStep({
               )}
               {def.allowFiles && (
                 <FileDrop
-                  label="Attachments"
+                  label={language === "zh" ? "附件" : "Attachments"}
                   hint={def.fileHint}
                   accept="image/*,.pdf"
                   multiple
@@ -583,7 +638,7 @@ function ModuleStep({
         onClick={() => onChange([...list, newEntry()])}
         className="btn-ghost mt-5 px-5 py-2.5 text-sm"
       >
-        + Add another {def.entryNoun}
+        {language === "zh" ? "+ 添加" : "+ Add another "}{def.entryNoun}
       </button>
     </section>
   );

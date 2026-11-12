@@ -8,6 +8,8 @@ import { plans, getPlan } from "@/content/plans";
 export default function CheckoutClient() {
   const params = useSearchParams();
   const draftId = params.get("draft") ?? "";
+  const orderId = params.get("order") ?? "";
+  const token = params.get("t") ?? "";
   const initial = getPlan(params.get("plan") ?? "")?.id ?? "year";
   const [planId, setPlanId] = useState<"preview" | "year">(initial);
   const [email, setEmail] = useState("");
@@ -23,7 +25,7 @@ export default function CheckoutClient() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, draftId, email }),
+        body: JSON.stringify({ planId, draftId, email, orderId, token }),
       });
       const json = (await res.json()) as { redirectUrl?: string; error?: string };
       if (!res.ok || !json.redirectUrl) {
@@ -38,6 +40,7 @@ export default function CheckoutClient() {
     }
   }
 
+  if (!draftId && !orderId) return <section className="mx-auto max-w-2xl px-5 py-16"><h1 className="text-3xl">Start with your story</h1><p className="mt-4">Add your name, CV and preferred style before buying a pass.</p><Link href="/start" className="btn-primary mt-6 inline-flex px-6 py-3">Add my content</Link></section>;
   return (
     <section className="min-h-[calc(100vh-5rem)] bg-[#ffffff] px-5 pb-20 pt-8 text-[#061b31] sm:pt-12">
       <div className="mx-auto max-w-[1120px]">

@@ -57,11 +57,11 @@ export const modules: ModuleDef[] = [
     id: "photos",
     icon: "📸",
     title: "Photos & images",
-    blurb: "Unlocks galleries and a visual identity — sites with photos convert 3× better.",
+    blurb: "Add portraits, event photos and work in progress to give your story a visual identity.",
     entryNoun: "photo",
     fields: [{ key: "caption", label: "Caption (optional)", type: "text", placeholder: "Keynote at Token2049, Singapore" }],
     allowFiles: true,
-    fileHint: "JPG/PNG, up to 8MB each. Event photos, portraits, behind-the-scenes.",
+    fileHint: "JPG/PNG, up to 4MB each. Event photos, portraits, behind-the-scenes.",
     example: "Speaking photos, team moments, product shots — anything that shows you in action.",
   },
   {
@@ -192,7 +192,7 @@ export const modules: ModuleDef[] = [
     id: "videos",
     icon: "🎬",
     title: "Videos & media appearances",
-    blurb: "Interviews, reels, and appearances — embedded, not just linked.",
+    blurb: "Interviews, reels, and appearances, with links to watch the original videos.",
     entryNoun: "video",
     fields: [
       { key: "title", label: "Title", type: "text", required: true, placeholder: "CNBC interview on AI markets" },
@@ -263,6 +263,7 @@ export type Essentials = {
 export type IntakeData = {
   draftId: string;
   style: SiteStyleId;
+  siteLanguage?: "auto" | "en" | "zh";
   essentials: Essentials;
   selected: ModuleId[];
   entries: Partial<Record<ModuleId, Entry[]>>;
@@ -322,7 +323,7 @@ export function richnessLabel(score: number): { label: string; desc: string } {
   if (score >= 75)
     return {
       label: "Unicorn",
-      desc: "Multi-page site with galleries, dedicated sections, and a magazine-grade layout — like our showcase sites.",
+      desc: "A detailed single-page site with galleries and dedicated sections, shaped around your material.",
     };
   if (score >= 50)
     return {

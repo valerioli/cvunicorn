@@ -22,7 +22,7 @@ const outputDetails = [
     },
   },
   {
-    title: { en: "Real generated pages", zh: "真实生成页面" },
+    title: { en: "Working design examples", zh: "可浏览的设计示例" },
     body: {
       en: "The previews are live pages with sections, imagery, motion, proof, and calls to action.",
       zh: "预览是真实页面，包含板块、图片、动效、证据和行动入口。",
@@ -48,10 +48,10 @@ export default function ShowcasePage() {
       />
 
       <section className="border-b border-[#e5edf5] bg-white px-5 pb-16 pt-10 sm:pt-16">
-        <SectionHeading
+        <SectionHeading as="h1"
           eyebrow={<T en="Showcase" zh="案例展示" />}
-          title={<T en="Four generated websites, side by side" zh="4 个生成网站，并列展示" />}
-          sub={<T en="Each preview below is a real website rendered directly on this page. Open any one to see the full generated result on its own domain." zh="下面每个预览都是真实网站，直接在本页渲染。点击任意案例，可以在它自己的域名上查看完整成品。" />}
+          title={<T en="Explore four personal site designs" zh="查看四种个人网站设计" />}
+          sub={<T en="Explore a live portfolio and three illustrative design demos. Open any preview to see the complete page." zh="查看一个真实个人网站与三个示例人物的设计演示，打开任意预览可浏览完整页面。" />}
         />
         <div className="stagger mx-auto mt-12 max-w-[1320px]">
           <CaseStudies />

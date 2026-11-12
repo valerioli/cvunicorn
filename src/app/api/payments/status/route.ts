@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrder, hasActiveAccess, markOrderFailed, markOrderPaid } from "@/lib/orders";
-import { verifyAccessToken } from "@/lib/access";
+import { verifyAccessToken, createAccessToken } from "@/lib/access";
 import { getPaymentProvider } from "@/lib/payments";
+import { kvGet } from "@/lib/storage";
+import { siteUrlForSlug, type SiteRecord } from "@/lib/sites";
 
 export const runtime = "nodejs";
 
@@ -36,7 +38,13 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const site = order.siteSlug ? await kvGet<SiteRecord>(`site:${order.siteSlug}`) : null;
   return NextResponse.json({
+    accountUrl: order.renewalOf && order.status === "paid" ? `/account?order=${order.renewalOf}&t=${createAccessToken(order.renewalOf)}` : null,
+    draftId: order.draftId,
+    siteUrl: order.siteSlug ? siteUrlForSlug(order.siteSlug) : null,
+    needsPublish: Boolean(site?.previewHtml),
+    published: Boolean(site?.html),
     orderId: order.id,
     status: order.status,
     planId: order.planId,

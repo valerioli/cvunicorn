@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from "crypto";
  *  without accounts or sessions. Token = orderId.expiry.signature */
 
 function secret(): string {
+  if (process.env.VERCEL_ENV === "production" && !process.env.ACCESS_TOKEN_SECRET) throw new Error("Access signing is not configured");
   return process.env.ACCESS_TOKEN_SECRET || "dev-secret-change-in-production";
 }
 
@@ -18,6 +19,7 @@ export function createAccessToken(orderId: string, ttlSeconds = 60 * 60 * 24 * 4
 }
 
 export function verifyAccessToken(token: string): { orderId: string } | null {
+  if (typeof token !== "string") return null;
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [orderId, expStr, sig] = parts;

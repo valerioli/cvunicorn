@@ -48,6 +48,8 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setOpen(!open)}
+          onKeyDown={e => { if (e.key === "Escape") setOpen(false); }}
+          aria-controls="mobile-navigation"
           aria-expanded={open}
           aria-label="Toggle menu"
           className="rounded-[4px] p-2 text-[#061b31] hover:bg-[#f8fafd] md:hidden"
@@ -60,7 +62,7 @@ export default function Header() {
 
       {open && (
         <div className="mx-auto max-w-[1320px] border-b border-[#e5edf5] bg-white/95 p-3 shadow-[0_18px_44px_rgba(6,27,49,0.08)] backdrop-blur-xl md:hidden">
-          <nav className="flex flex-col" aria-label="Mobile">
+          <nav id="mobile-navigation" onKeyDown={e => { if (e.key === "Escape") setOpen(false); }} className="flex flex-col" aria-label="Mobile">
             {nav.map((item) => (
               <Link
                 key={item.href}

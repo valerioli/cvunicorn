@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { kvGet } from "@/lib/storage";
 import { getOrder, hasActiveAccess } from "@/lib/orders";
 import type { SiteRecord } from "@/lib/sites";
+import { siteHeaders } from "@/lib/siteSecurity";
 
 export const runtime = "nodejs";
 
@@ -14,7 +15,7 @@ export async function GET(
 ) {
   const { slug } = await params;
   const record = await kvGet<SiteRecord>(`site:${slug}`);
-  if (!record) {
+  if (!record?.html) {
     return new NextResponse(offlineHtml("This site doesn't exist (yet)."), {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -31,8 +32,7 @@ export async function GET(
 
   return new NextResponse(record.html, {
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
+      ...siteHeaders,
       "X-Robots-Tag": "index, follow",
     },
   });

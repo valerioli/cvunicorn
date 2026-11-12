@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrder, hasActiveAccess, saveOrder } from "@/lib/orders";
 import { verifyAccessToken } from "@/lib/access";
-import { kvGet, kvSet } from "@/lib/storage";
+import { kvGet, kvSet, acquireLease, releaseLease } from "@/lib/storage";
+import { isIntake } from "@/lib/intakeValidation";
 import { generateSiteHtml, slugify } from "@/lib/ai/generator";
 import type { IntakeData } from "@/lib/intake";
 import { SITE_TTL, siteUrlForSlug, type SiteRecord } from "@/lib/sites";
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     orderId?: string;
     token?: string;
   } | null;
-  if (!body?.orderId || !body.token) {
+  if (typeof body?.orderId !== "string" || typeof body.token !== "string" || !body.orderId || !body.token) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
   const verified = verifyAccessToken(body.token);
@@ -33,20 +34,24 @@ export async function POST(req: NextRequest) {
   }
 
   const draft = await kvGet<IntakeData>(`draft:${order.draftId}`);
-  if (!draft) {
+  if (!isIntake(draft) || !draft.essentials.fullName.trim() || !draft.essentials.headline.trim()) {
     return NextResponse.json(
       { error: "We couldn't find your content draft. Please rebuild it at /start." },
       { status: 404 },
     );
   }
 
+  const lease = crypto.randomUUID();
+  if (!await acquireLease(`generation:${order.id}`, lease, 280)) return NextResponse.json({ error: "Your site is already being generated. Please wait, then refresh your dashboard." }, { status: 409 });
   try {
     const html = await generateSiteHtml(draft);
     const slug = order.siteSlug ?? (await uniqueSiteSlug(draft.essentials.fullName));
+    const existing = order.siteSlug ? await kvGet<SiteRecord>(`site:${slug}`) : null;
     const record: SiteRecord = {
       slug,
       orderId: order.id,
-      html,
+      html: existing?.html ?? "",
+      previewHtml: html,
       generatedAt: Date.now(),
     };
     await kvSet(`site:${slug}`, record, SITE_TTL);
@@ -54,26 +59,20 @@ export async function POST(req: NextRequest) {
       order.siteSlug = slug;
       await saveOrder(order);
     }
-    return NextResponse.json({ siteUrl: siteUrlForSlug(slug) });
+    return NextResponse.json({ siteUrl: siteUrlForSlug(slug), needsPublish: true });
   } catch (err) {
     console.error("[generate] failed:", err);
-    const message =
-      err instanceof Error &&
-      (err.message.includes("OPENROUTER_API_KEY") ||
-        err.message.includes("OPENAI_API_KEY") ||
-        err.message.includes("ANTHROPIC_API_KEY") ||
-        err.message.includes("OpenRouter API has no credits remaining") ||
-        err.message.includes("OpenAI API has no credits remaining"))
-        ? err.message
-        : "Generation hit a snag — please try again in a minute. If it keeps failing, contact support.";
+    const message = "We couldn't finish this design. Your content and any published site are safe. Try again in a minute, or contact support with your order number.";
     return NextResponse.json({ error: message }, { status: 502 });
+  } finally {
+    await releaseLease(`generation:${order.id}`, lease).catch(() => console.error("[generate] lease release failed; it will expire automatically"));
   }
 }
 
 async function uniqueSiteSlug(name: string): Promise<string> {
   const base = slugify(name, { randomSuffix: false });
   for (let i = 0; i < 20; i += 1) {
-    const candidate = i === 0 ? base : `${base}-${i + 1}`;
+    const candidate = `${base}-${crypto.randomUUID().slice(0, 8)}`;
     const existing = await kvGet<SiteRecord>(`site:${candidate}`);
     if (!existing) return candidate;
   }

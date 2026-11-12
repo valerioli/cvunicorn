@@ -201,7 +201,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     slug: "maya-chen",
     name: "Maya Chen",
     style: "mercury",
-    heroImage: "/cases/maya-chen-hero.png",
+    heroImage: "/cases/maya-chen-hero.webp",
     externalUrl: "https://mayachen.cvunicorn.com",
     role: {
       en: "Fractional CFO for climate startups",
@@ -295,7 +295,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     slug: "noah-rivera",
     name: "Noah Rivera",
     style: "resend",
-    heroImage: "/cases/noah-rivera-hero.png",
+    heroImage: "/cases/noah-rivera-hero.webp",
     externalUrl: "https://noahrivera.cvunicorn.com",
     role: {
       en: "Senior product designer, health AI",
@@ -389,7 +389,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
     slug: "ari-okafor",
     name: "Ari Okafor",
     style: "active",
-    heroImage: "/cases/ari-okafor-hero.png",
+    heroImage: "/cases/ari-okafor-hero.webp",
     externalUrl: "https://ariokafor.cvunicorn.com",
     role: {
       en: "Independent robotics researcher",

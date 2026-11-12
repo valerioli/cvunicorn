@@ -1195,9 +1195,9 @@ function renderSite(site: GeneratedCaseSite, lang: Lang, styleId: StyleId, origi
     <footer id="contact" class="wrap">
       <div>
         <span>${lang === "zh" ? "准备好开启对话" : "Ready for the next conversation"}</span>
-        <strong>${esc(site.name.split(" ")[0])}@cvunicorn.site</strong>
+        <strong>${lang === "zh" ? "示例人物 · 设计演示" : "Illustrative profile · design demo"}</strong>
       </div>
-      <a class="cta" href="mailto:hello@example.com">${lang === "zh" ? "发起合作" : "Start a conversation"}</a>
+      <a class="cta" href="https://cvunicorn.com/start" target="_blank" rel="noopener">${lang === "zh" ? "创建我的网站" : "Build my own site"}</a>
     </footer>
   </div>
 </body>
@@ -1222,6 +1222,7 @@ export async function GET(
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "public, max-age=0, must-revalidate",
+      "x-robots-tag": "noindex, follow",
     },
   });
 }

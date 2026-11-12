@@ -125,8 +125,8 @@ const details = [
     title: { en: "Preview, publish, own it", zh: "预览、发布、拥有它" },
     points: [
       {
-        en: "See your complete website before paying a cent of the yearly price.",
-        zh: "在支付全年费用前，你可以先看到完整网站。",
+        en: "Choose a pass, generate your site, then review the complete design before publishing.",
+        zh: "选择方案并生成网站，检查完整设计后再确认发布。",
       },
       {
         en: "$0.99 puts it live for 3 days on a shareable link — the real site, not a demo.",
@@ -157,7 +157,7 @@ export default function HowItWorksPage() {
         ]}
       />
       <section className="border-b border-[#e5edf5] bg-white px-5 pb-4 pt-10 sm:pt-16">
-        <SectionHeading
+        <SectionHeading as="h1"
           eyebrow={<T en="How it works" zh="如何运作" />}
           title={<T en="Four steps, honestly spent" zh="四步完成，一个像样的网站" />}
           sub={<T en="Add your material, choose a style, let the AI build, then preview and publish the real site." zh="添加材料、选择风格、交给 AI 生成，然后预览并发布真实网站。" />}

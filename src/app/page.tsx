@@ -39,8 +39,8 @@ const steps = [
     n: "01",
     title: { en: "Give us anything", zh: "给我们任意材料" },
     body: {
-      en: "Start with a CV, a paragraph, a few links, or a folder of work. Nothing is mandatory; every extra detail simply gives CVUnicorn more to shape.",
-      zh: "可以从一份简历、一段介绍、几个链接或一组作品开始。没有必填压力；额外材料只会让生成的网站更丰富。",
+      en: "Start with a CV, a paragraph, a few links, or a folder of work. Your name and headline get you started; every extra detail simply gives CVUnicorn more to shape.",
+      zh: "可以从一份简历、一段介绍、几个链接或一组作品开始。只需先填写姓名和职业标题；额外材料只会让生成的网站更丰富。",
     },
   },
   {
@@ -55,8 +55,8 @@ const steps = [
     n: "03",
     title: { en: "Go live in minutes", zh: "几分钟内上线" },
     body: {
-      en: "Preview your finished website, then publish for $0.99. Love it? Keep it for a year with your own domain for $9.99. No subscription traps.",
-      zh: "先预览完成的网站，再用 0.99 美元发布。满意的话，9.99 美元可保留一年并绑定自己的域名。没有订阅陷阱。",
+      en: "Choose a hosting pass from $0.99, generate your site, then review it before publishing. A year costs $9.99, with support for connecting your own domain.",
+      zh: "选择 0.99 美元起的方案，生成网站后先检查，再发布。年费 9.99 美元，可协助绑定你已有的域名。",
     },
   },
 ];
@@ -141,7 +141,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow={<T en="Showcase" zh="案例展示" />}
           title={<span id="showcase"><T en="Four websites, embedded on the page" zh="4 个网站，直接嵌入页面预览" /></span>}
-          sub={<T en="Four generated examples, each with a distinct visual system and a real page behind the preview." zh="4 个生成案例，每个都有不同的视觉系统，并且预览背后都是真实页面。" />}
+          sub={<T en="A live portfolio and three illustrative design demos. Open each to explore its full layout." zh="一个真实个人网站与三个设计演示。打开查看完整布局与风格。" />}
         />
         <div className="stagger mt-12">
           <CaseStudies />

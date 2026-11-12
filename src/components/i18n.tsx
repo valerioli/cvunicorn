@@ -18,7 +18,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    let stored: string | null = null;
+    try { stored = window.localStorage.getItem(STORAGE_KEY); } catch {}
     if (stored === "zh" || stored === "en") {
       setLanguageState(stored);
     }
@@ -26,7 +27,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = (next: Language) => {
     setLanguageState(next);
-    window.localStorage.setItem(STORAGE_KEY, next);
+    try { window.localStorage.setItem(STORAGE_KEY, next); } catch {}
     document.documentElement.lang = next === "zh" ? "zh-CN" : "en";
   };
 
