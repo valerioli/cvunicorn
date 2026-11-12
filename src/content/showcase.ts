@@ -104,8 +104,8 @@ export const caseStudySites: GeneratedCaseSite[] = [
     heroImage: "https://raw.githubusercontent.com/valerioli/portfolio-site/main/headshot.jpg",
     externalUrl: "https://valerio.cvunicorn.com",
     role: {
-      en: "General Manager, AInfinity",
-      zh: "AInfinity 总经理",
+      en: "Independent Builder, Questant",
+      zh: "Questant 独立构建者",
     },
     industry: { en: "Growth leadership", zh: "增长与品牌领导力" },
     goal: {
@@ -116,7 +116,7 @@ export const caseStudySites: GeneratedCaseSite[] = [
       en: "A six-section personal magazine with career metrics, field notes, writing, side projects, and a sharp executive close.",
       zh: "生成一个六段式个人杂志网站，包含职业成果、现场记录、文章、副项目和高管简介。",
     },
-    metric: { en: "50,000+ users scaled", zh: "增长至 50,000+ 用户" },
+    metric: { en: "Infini: 50,000+ users", zh: "Infini：增长至 50,000+ 用户" },
     accent: "#533afd",
     accentSoft: "#e8e9ff",
     sections: [
@@ -130,14 +130,14 @@ export const caseStudySites: GeneratedCaseSite[] = [
       zh: "完整简历 · 职业数据 · 演讲照片 · 已发表文章 · 副项目 · 小说写作",
     },
     site: {
-      eyebrow: { en: "Marketing operator for AI and finance", zh: "AI 与金融领域的营销操盘手" },
+      eyebrow: { en: "Building Questant · AI, content & growth", zh: "Questant · AI 产品、内容与增长" },
       headline: {
         en: "Building narratives that move markets, products, and people.",
         zh: "打造能够推动市场、产品与人的叙事。",
       },
       subhead: {
-        en: "From luxury retail launches to Pay-Fi category design, Valerio's site turns fragmented career material into a confident executive presence.",
-        zh: "从奢侈品数字化到 Pay-Fi 品类叙事，这个网站把分散的职业材料整理成高可信度的高管形象。",
+        en: "From luxury digital growth and Pay-Fi brand building to Questant, Valerio connects AI products, content, and commercial growth.",
+        zh: "从奢侈品数字化、Pay-Fi 品牌建设到 Questant，连接 AI 产品、内容与商业增长。",
       },
       stats: [
         { value: "$30M", label: { en: "year-one digital revenue", zh: "首年数字业务收入" } },
@@ -178,11 +178,11 @@ export const caseStudySites: GeneratedCaseSite[] = [
           },
         },
         {
-          title: { en: "AI operator field notes", zh: "AI 操盘现场笔记" },
+          title: { en: "Questant: hands-on AI product", zh: "Questant：亲手构建 AI 产品" },
           meta: { en: "Writing · talks · experiments", zh: "写作 · 演讲 · 实验" },
           body: {
-            en: "A living archive of essays, talks, and side projects that shows how strategy becomes shipped work.",
-            zh: "用文章、演讲和副项目构成动态档案，展示策略如何落到真实执行。",
+            en: "An independently built AI learning product spanning product design, content workflows, and acquisition.",
+            zh: "独立构建 AI 学习产品，亲自参与产品设计、内容工作流与获客。",
           },
         },
       ],
