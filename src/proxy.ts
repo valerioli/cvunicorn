@@ -17,6 +17,16 @@ const generatedSitePaths: Record<string, { slug: string; style: string }> = {
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host")?.toLowerCase().split(":")[0] ?? "";
   const pathname = request.nextUrl.pathname;
+  // Dedicated, static entertainment H5. Keep the main product and portfolio hosts unchanged.
+  if (host === "maths.cvunicorn.com") {
+    const assets = new Set(["/index.html", "/app.js", "/style.css", "/motion.css", "/logic.mjs", "/effects.mjs", "/template.config.mjs", "/entry.png", "/qr.png"]);
+    if (pathname !== "/" && !assets.has(pathname)) {
+      return new NextResponse("Not found", { status: 404 });
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = `/coconut-h5${pathname === "/" ? "/index.html" : pathname}`;
+    return NextResponse.rewrite(url);
+  }
   const customSiteSlug = generatedSiteSlugFromHost(host);
 
   if (host === "valerio.cvunicorn.com" && !pathname.startsWith("/valerio-original")) {
