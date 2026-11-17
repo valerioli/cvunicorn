@@ -1,12 +1,12 @@
-# 椰子酱 H5 模板
+﻿# 椰子酱 H5 模板
 
-正式入口：`https://adhd.questant.app/`。复用既有 cvunicorn Git → Vercel Production 与通配域名；`src/proxy.ts` 仅为 maths 主机改写静态白名单资源，主站与作品集逻辑保持。
+正式入口：`https://adhd.questant.app/`。复用既有 cvunicorn Git → Vercel Production；`src/proxy.ts` 为 adhd.questant.app 改写静态白名单资源，旧 maths 主机永久跳转，主站与作品集逻辑保持。
 
 ## 可复用结构
 
 - `public/coconut-h5/template.config.mjs`：题库（标题/场景/问题）、频率标签、结果分组、品牌、标准分享地址、配色、反馈短句和动效/声音参数。
-- `app.js`：问答、回退、候选结果、分享图。零网络答案提交、零浏览器答案持久化。
-- `logic.mjs`：基于场景回答选择趣味称号；多个候选由玩家选择，不生成心理/医学概率。
+- `app.js`：双语问答、回退、自动单结果、分享图。零网络答案提交、零浏览器答案持久化。
+- `logic.mjs`：基于场景回答选择趣味称号；自动只取最接近的一个，不生成心理/医学概率。
 - `effects.mjs`：选择反馈、短暂停滞、轻抖动、切题、结果盖章与单次低强度闪白。Web Audio 合成短音，不下载音频；默认静音，用户开启后才创建/恢复音频上下文。
 - `style.css` / `motion.css`：奶油黄、墨蓝、珊瑚红的编辑漫画视觉。
 
@@ -18,7 +18,7 @@
 
 ## 交付检查
 
-运行仓库 `npm test` / `npm run check` / `npm run build`。H5 浏览器检查需覆盖真实中文题面、禁用下一题、返回/改答、结果选择、静音/开启、手动关闭动效、系统减少动态效果、分享 PNG、连续点击、重测清空、320/390/768/1280px 无溢出。生产验收同时检查根页面与所有 module/CSS 资源，不能仅检查 HTTP 200。
+运行仓库 `npm test` / `npm run check` / `npm run build`。H5 浏览器检查需覆盖真实中文题面、禁用下一题、返回/改答、自动单结果、静音/开启、手动关闭动效、系统减少动态效果、分享 PNG、连续点击、重测清空、320/390/768/1280px 无溢出。生产验收同时检查根页面与所有 module/CSS 资源，不能仅检查 HTTP 200。
 
 公众号入口用可编辑文案 + 独立视觉入口/二维码，绑定正式地址。公众号正文不能直接运行 JS；正文外链是否允许以账号后台实际验证为准，“阅读原文”与可识别二维码均需验收。只保存草稿，不自动发表文章。
 
@@ -31,3 +31,4 @@
 - Official Questant raster logo is unmodified. Bangers is self-hosted under its bundled OFL license. Keep both files in the host asset allowlist when reusing this template.
 - Canvas waits for fonts and logo decode; exported copy follows locale while titles remain bilingual. Entry artwork and QR are rebuilt using `node scripts/coconut-entry.mjs`.
 - Validation: Chinese and English complete flows, back/edit persistence, language switching, direct English links, one-result export, sound opt-in, reduced motion, responsive widths, existing host routing, TypeScript and Next production build.
+
