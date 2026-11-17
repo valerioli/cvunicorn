@@ -19,7 +19,10 @@ export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   // Dedicated, static entertainment H5. Keep the main product and portfolio hosts unchanged.
   if (host === "maths.cvunicorn.com") {
-    const assets = new Set(["/index.html", "/app.js", "/style.css", "/motion.css", "/logic.mjs", "/effects.mjs", "/template.config.mjs", "/entry.png", "/qr.png"]);
+    return NextResponse.redirect(new URL(`https://adhd.questant.app${pathname}${request.nextUrl.search}`), 308);
+  }
+  if (host === "adhd.questant.app") {
+    const assets = new Set(["/index.html", "/app.js", "/style.css", "/motion.css", "/logic.mjs", "/effects.mjs", "/template.config.mjs", "/entry.png", "/qr.png", "/questant-logo.png", "/en.mjs", "/Bangers-Regular.ttf", "/Bangers-OFL.txt"]);
     if (pathname !== "/" && !assets.has(pathname)) {
       return new NextResponse("Not found", { status: 404 });
     }

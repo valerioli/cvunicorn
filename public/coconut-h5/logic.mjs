@@ -1,4 +1,9 @@
 import config from './template.config.mjs';
 export const {groups,calm}=config;
-export function candidates(a){if(a.length!==config.questions.length||a.some(x=>!Number.isInteger(x)||x<0||x>4))throw new Error('请先完成全部八题');return groups.filter(g=>g.items.some(i=>a[i]>=3));}
-export function pickResult(a,id){const c=candidates(a);if(!c.length)return calm;const found=c.find(g=>g.id===id);if(!found)throw new Error('请选一个最想改善的场景');return found;}
+export function pickResult(a){
+ if(a.length!==config.questions.length||a.some(x=>!Number.isInteger(x)||x<0||x>=config.labels.length))throw new Error('请先完成所有题目');
+ if(a.every(x=>x<config.resultPolicy.neutralWhenAllBelow))return calm;
+ const ranked=groups.map((g,index)=>({g,index,sum:g.items.reduce((s,i)=>s+a[i],0),peak:Math.max(...g.items.map(i=>a[i]))}));
+ ranked.sort((a,b)=>b.sum-a.sum||b.peak-a.peak||a.index-b.index);
+ return ranked[0].g;
+}
